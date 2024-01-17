@@ -44,7 +44,10 @@ assemblyFlags:
   - -fdata-sections
   - -ffunction-sections
 
-linkerFlags: []
+linkerFlags: 
+  - -Wl,--print-memory-usage
+  - micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/libmicroros.a # micro-ros
+ 
 
 # libraries to be included. The -l prefix to the library will be automatically added.
 libraries: 
@@ -75,6 +78,7 @@ includeDirectories:
   - Src/**
   - Core/Src/**
   - Core/Lib/**
+  - micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/** # micro-ros
 
 
 # Files that should be included in the compilation.
@@ -86,6 +90,8 @@ sourceFiles:
   - Src/**
   - Core/Src/**
   - Core/Lib/**
+  - micro_ros_stm32cubemx_utils/extra_sources/* # micro-ros utils
+  - micro_ros_stm32cubemx_utils/extra_sources/microros_transports/dma_transport.c # micro-ros transport
 
 
 # When no makefile is present it will show a warning pop-up.

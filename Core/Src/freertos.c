@@ -58,16 +58,16 @@ typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-uint32_t defaultTaskBuffer[3000];
-osStaticThreadDef_t defaultTaskControlBlock;
-const osThreadAttr_t defaultTask_attributes = {
-    .name = "defaultTask",
-    .cb_mem = &defaultTaskControlBlock,
-    .cb_size = sizeof(defaultTaskControlBlock),
-    .stack_mem = &defaultTaskBuffer[0],
-    .stack_size = sizeof(defaultTaskBuffer),
+/* Definitions for rosTask */
+osThreadId_t rosTaskHandle;
+uint32_t rosTaskBuffer[3000];
+osStaticThreadDef_t rosTaskControlBlock;
+const osThreadAttr_t rosTask_attributes = {
+    .name = "rosTask",
+    .cb_mem = &rosTaskControlBlock,
+    .cb_size = sizeof(rosTaskControlBlock),
+    .stack_mem = &rosTaskBuffer[0],
+    .stack_size = sizeof(rosTaskBuffer),
     .priority = (osPriority_t)osPriorityNormal,
 };
 
@@ -84,7 +84,7 @@ void* microros_reallocate(void* pointer, size_t size, void* state);
 void* microros_zero_allocate(size_t number_of_elements, size_t size_of_element, void* state);
 /* USER CODE END FunctionPrototypes */
 
-void StartDefaultTask(void* argument);
+void StartRosTask(void* argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -115,8 +115,8 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* creation of rosTask */
+  rosTaskHandle = osThreadNew(StartRosTask, NULL, &rosTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -127,15 +127,15 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_EVENTS */
 }
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_StartRosTask */
 /**
- * @brief  Function implementing the defaultTask thread.
+ * @brief  Function implementing the rosTask thread.
  * @param  argument: Not used
  * @retval None
  */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void* argument) {
-  /* USER CODE BEGIN StartDefaultTask */
+/* USER CODE END Header_StartRosTask */
+void StartRosTask(void* argument) {
+  /* USER CODE BEGIN StartRosTask */
   /* Infinite loop */
 
   // micro-ROS configuration
@@ -192,7 +192,7 @@ void StartDefaultTask(void* argument) {
     msg.data++;
     osDelay(10);
   }
-  /* USER CODE END StartDefaultTask */
+  /* USER CODE END StartRosTask */
 }
 
 /* Private application code --------------------------------------------------*/

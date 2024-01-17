@@ -158,7 +158,130 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
 -IMiddlewares/Third_Party/FreeRTOS/Source/include \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
--Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/action_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/action_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/action_msgs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/action_msgs/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/actionlib_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/actionlib_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/builtin_interfaces/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/builtin_interfaces/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/composition_interfaces/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/composition_interfaces/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/composition_interfaces/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/control_msgs/action \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/control_msgs/action/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/control_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/control_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/control_msgs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/control_msgs/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/diagnostic_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/diagnostic_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/diagnostic_msgs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/diagnostic_msgs/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/example_interfaces/action \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/example_interfaces/action/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/example_interfaces/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/example_interfaces/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/example_interfaces/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/example_interfaces/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/geometry_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/geometry_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/libyaml_vendor \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/lifecycle_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/lifecycle_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/lifecycle_msgs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/lifecycle_msgs/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_utilities \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/nav_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/nav_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/nav_msgs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/nav_msgs/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcl \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcl_action \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcl_interfaces/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcl_interfaces/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcl_interfaces/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcl_interfaces/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcl_lifecycle \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcl_logging_interface \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rclc \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rclc_lifecycle \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rclc_parameter \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcutils \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcutils/stdatomic_helper/gcc \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcutils/stdatomic_helper/win32 \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcutils/testing \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rcutils/types \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rmw \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rmw/events_statuses \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rmw/impl \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rmw/impl/cpp \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rmw_microros \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rmw_microxrcedds_c \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rosgraph_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rosgraph_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rosidl_runtime_c \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rosidl_typesupport_c \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rosidl_typesupport_interface \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rosidl_typesupport_introspection_c \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/rosidl_typesupport_microxrcedds_c \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/sensor_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/sensor_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/sensor_msgs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/sensor_msgs/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/shape_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/shape_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/statistics_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/statistics_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/std_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/std_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/std_srvs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/std_srvs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/std_srvs/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/stereo_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/stereo_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/test_msgs \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/test_msgs/action \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/test_msgs/action/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/test_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/test_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/test_msgs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/test_msgs/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/tf2_msgs/action \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/tf2_msgs/action/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/tf2_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/tf2_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/tf2_msgs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/tf2_msgs/srv/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/tracetools \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/trajectory_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/trajectory_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/ucdr \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/unique_identifier_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/unique_identifier_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/core/communication \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/core/session \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/core/session/stream \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/core/type \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/profile/discovery \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/profile/multithread \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/profile/transport/can \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/profile/transport/custom \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/profile/transport/ip \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/profile/transport/ip/tcp \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/profile/transport/ip/udp \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/profile/transport/serial \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/profile/transport/stream_framing \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/uxr/client/util \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/visualization_msgs/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/visualization_msgs/msg/detail \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/visualization_msgs/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/visualization_msgs/srv/detail
 
 
 
@@ -195,7 +318,7 @@ LIBDIR = \
 
 
 # Additional LD Flags from config file
-ADDITIONALLDFLAGS = -specs=nano.specs 
+ADDITIONALLDFLAGS = -Wl,--print-memory-usage -specs=nano.specs micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/libmicroros.a 
 
 LDFLAGS = $(MCU) $(ADDITIONALLDFLAGS) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
@@ -214,7 +337,6 @@ vpath %.cpp $(sort $(dir $(CPP_SOURCES)))
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
 
-# list of ASM program objects
 # list of ASM program objects
 UPPER_CASE_ASM_SOURCES = $(filter %.S,$(ASM_SOURCES))
 LOWER_CASE_ASM_SOURCES = $(filter %.s,$(ASM_SOURCES))
