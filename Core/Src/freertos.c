@@ -32,7 +32,7 @@
 #include <rclc/rclc.h>
 #include <rmw_microros/rmw_microros.h>
 #include <rmw_microxrcedds_c/config.h>
-#include <std_msgs/msg/int32.h>
+#include <std_msgs/msg/bool.h>
 #include <stdbool.h>
 #include <usart.h>
 #include <uxr/client/transport.h>
@@ -168,8 +168,9 @@ void StartRosTask(void* argument) {
 
   // micro-ROS app
 
-  rcl_publisher_t publisher;
-  std_msgs__msg__Int32 msg;
+  rcl_publisher_t publisher_button;
+  std_msgs__msg__Bool msg_button;
+
   rclc_support_t support;
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
   rcl_allocator_t allocator;
@@ -190,20 +191,27 @@ void StartRosTask(void* argument) {
 
   // create publisher
   rclc_publisher_init_default(
-      &publisher,
+      &publisher_button,
       &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
-      "cubemx_publisher");
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+      "/button");
 
-  msg.data = 0;
+  GPIO_PinState last_button_state = false;
 
   for (;;) {
-    rcl_ret_t ret = rcl_publish(&publisher, &msg, NULL);
-    if (ret != RCL_RET_OK) {
-      printf("Error publishing (line %d)\n", __LINE__);
+    // NOTE: The Button is inverted!
+    GPIO_PinState btn_state = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+
+    if (btn_state != last_button_state) {
+      last_button_state = btn_state;
+      msg_button.data = (bool)btn_state;
+
+      rcl_ret_t ret = rcl_publish(&publisher_button, &msg_button, NULL);
+      if (ret != RCL_RET_OK) {
+        printf("Error publishing (line %d)\n", __LINE__);
+      }
     }
 
-    msg.data++;
     osDelay(10);
   }
   /* USER CODE END StartRosTask */
