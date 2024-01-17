@@ -46,6 +46,14 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define RCCHECK(fn)                                                                \
+  {                                                                                \
+    rcl_ret_t temp_rc = fn;                                                        \
+    if ((temp_rc != RCL_RET_OK)) {                                                 \
+      printf("Failed status on line %d: %d. Aborting.\n", __LINE__, (int)temp_rc); \
+      return 1;                                                                    \
+    }                                                                              \
+  }
 
 /* USER CODE END PD */
 
@@ -163,16 +171,22 @@ void StartRosTask(void* argument) {
   rcl_publisher_t publisher;
   std_msgs__msg__Int32 msg;
   rclc_support_t support;
+  rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
   rcl_allocator_t allocator;
+
   rcl_node_t node;
 
   allocator = rcl_get_default_allocator();
 
+  RCCHECK(rcl_init_options_init(&init_options, allocator));
+  RCCHECK(rcl_init_options_set_domain_id(&init_options, 255));  // Domain ID 255 is set so the Domain ID of the agent is used
+
   // create init_options
-  rclc_support_init(&support, 0, NULL, &allocator);
+  // rclc_support_init(&support, 0, NULL, &allocator);
+  RCCHECK(rclc_support_init_with_options(&support, 0, NULL, &init_options, &allocator));
 
   // create node
-  rclc_node_init_default(&node, "cubemx_node", "", &support);
+  rclc_node_init_default(&node, "stm32_node", "", &support);  // Node Name: stm32_node, Namespace: ""
 
   // create publisher
   rclc_publisher_init_default(
