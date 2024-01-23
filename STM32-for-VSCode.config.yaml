@@ -20,7 +20,8 @@ floatAbi: -mfloat-abi=hard
 ldscript: STM32L452RETxP_FLASH.ld # linker script
 
 # Compiler definitions. The -D prefix for the compiler will be automatically added.
-cDefinitions: []
+cDefinitions:
+  - USE_FULL_ASSERT
 cxxDefinitions: []
 asDefinitions: []
 
@@ -90,8 +91,11 @@ sourceFiles:
   - Src/**
   - Core/Src/**
   - Core/Lib/**
-  - micro_ros_stm32cubemx_utils/extra_sources/* # micro-ros utils
-  - micro_ros_stm32cubemx_utils/extra_sources/microros_transports/dma_transport.c # micro-ros transport
+  #- micro_ros_stm32cubemx_utils/extra_sources/* # micro-ros utils
+  - micro_ros_stm32cubemx_utils/extra_sources/custom_memory_manager.c
+  - micro_ros_stm32cubemx_utils/extra_sources/microros_allocators.c
+  - micro_ros_stm32cubemx_utils/extra_sources/microros_time.c
+  - micro_ros_stm32cubemx_utils/extra_sources/microros_transports/usb_cdc_transport.c # micro-ros transport
 
 
 # When no makefile is present it will show a warning pop-up.

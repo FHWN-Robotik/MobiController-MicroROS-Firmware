@@ -4,7 +4,9 @@
     "transport.h": "c",
     "custom_transport.h": "c",
     "rclc.h": "c",
-    "init.h": "c"
+    "init.h": "c",
+    "usb_device.h": "c",
+    "usbd_def.h": "c"
   },
   "cortex-debug.armToolchainPath": "/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/12.2.1-1.2.1/.content/bin",
   "cortex-debug.openocdPath": "/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-1.1/.content/bin/openocd"

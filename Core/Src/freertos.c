@@ -34,8 +34,9 @@
 #include <rmw_microxrcedds_c/config.h>
 #include <std_msgs/msg/bool.h>
 #include <stdbool.h>
-#include <usart.h>
 #include <uxr/client/transport.h>
+
+#include "usb_device.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -94,6 +95,7 @@ void* microros_zero_allocate(size_t number_of_elements, size_t size_of_element, 
 
 void StartRosTask(void* argument);
 
+extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
@@ -143,6 +145,8 @@ void MX_FREERTOS_Init(void) {
  */
 /* USER CODE END Header_StartRosTask */
 void StartRosTask(void* argument) {
+  /* init code for USB_DEVICE */
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartRosTask */
   /* Infinite loop */
 
@@ -150,7 +154,7 @@ void StartRosTask(void* argument) {
 
   rmw_uros_set_custom_transport(
       true,
-      (void*)&huart2,
+      NULL,
       cubemx_transport_open,
       cubemx_transport_close,
       cubemx_transport_write,
@@ -180,7 +184,7 @@ void StartRosTask(void* argument) {
   allocator = rcl_get_default_allocator();
 
   RCCHECK(rcl_init_options_init(&init_options, allocator));
-  RCCHECK(rcl_init_options_set_domain_id(&init_options, 255));  // Domain ID 255 is set so the Domain ID of the agent is used
+  RCCHECK(rcl_init_options_set_domain_id(&init_options, 255));  // Domain ID 255 is set so the Domain ID of the agent is used https://github.com/micro-ROS/micro-ROS-Agent/issues/182
 
   // create init_options
   // rclc_support_init(&support, 0, NULL, &allocator);
