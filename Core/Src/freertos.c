@@ -36,7 +36,6 @@
 #include <stdbool.h>
 #include <uxr/client/transport.h>
 
-#include "usb_device.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -204,7 +203,7 @@ void StartRosTask(void* argument) {
 
   for (;;) {
     // NOTE: The Button is inverted!
-    GPIO_PinState btn_state = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+    GPIO_PinState btn_state = HAL_GPIO_ReadPin(USER_BTN_GPIO_Port, USER_BTN_Pin);
 
     if (btn_state != last_button_state) {
       last_button_state = btn_state;
