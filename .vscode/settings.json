@@ -6,7 +6,18 @@
     "rclc.h": "c",
     "init.h": "c",
     "usb_device.h": "c",
-    "usbd_def.h": "c"
+    "usbd_def.h": "c",
+    "quaternion.h": "c",
+    "quaternion__functions.h": "c",
+    "quaternion__struct.h": "c",
+    "quaternion__type_support.h": "c",
+    "message_type_support_struct.h": "c",
+    "bno055_dma.h": "c",
+    "string.h": "c",
+    "string__struct.h": "c",
+    "string_utilities.h": "c",
+    "cmsis_os.h": "c",
+    "i2c.h": "c"
   },
   "cortex-debug.armToolchainPath": "/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/12.2.1-1.2.1/.content/bin",
   "cortex-debug.openocdPath": "/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-1.1/.content/bin/openocd"

@@ -32,9 +32,12 @@
 #include <rclc/rclc.h>
 #include <rmw_microros/rmw_microros.h>
 #include <rmw_microxrcedds_c/config.h>
+#include <sensor_msgs/msg/temperature.h>
 #include <std_msgs/msg/bool.h>
 #include <stdbool.h>
 #include <uxr/client/transport.h>
+
+#include "bno055_dma.h"
 
 /* USER CODE END Includes */
 
@@ -51,7 +54,7 @@ typedef StaticTask_t osStaticThreadDef_t;
     rcl_ret_t temp_rc = fn;                                                        \
     if ((temp_rc != RCL_RET_OK)) {                                                 \
       printf("Failed status on line %d: %d. Aborting.\n", __LINE__, (int)temp_rc); \
-      return 1;                                                                    \
+      return;                                                                      \
     }                                                                              \
   }
 
@@ -64,18 +67,20 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+rcl_publisher_t temp_pup;
 
 /* USER CODE END Variables */
-/* Definitions for rosTask */
-osThreadId_t rosTaskHandle;
-uint32_t rosTaskBuffer[3000];
-osStaticThreadDef_t rosTaskControlBlock;
-const osThreadAttr_t rosTask_attributes = {
-    .name = "rosTask",
-    .cb_mem = &rosTaskControlBlock,
-    .cb_size = sizeof(rosTaskControlBlock),
-    .stack_mem = &rosTaskBuffer[0],
-    .stack_size = sizeof(rosTaskBuffer),
+
+/* Definitions for ros_task */
+osThreadId_t ros_taskHandle;
+uint32_t ros_task_buffer[3000];
+osStaticThreadDef_t ros_task_control_block;
+const osThreadAttr_t ros_task_attributes = {
+    .name = "ros_task",
+    .cb_mem = &ros_task_control_block,
+    .cb_size = sizeof(ros_task_control_block),
+    .stack_mem = &ros_task_buffer[0],
+    .stack_size = sizeof(ros_task_buffer),
     .priority = (osPriority_t)osPriorityNormal,
 };
 
@@ -90,9 +95,10 @@ void* microros_allocate(size_t size, void* state);
 void microros_deallocate(void* pointer, void* state);
 void* microros_reallocate(void* pointer, size_t size, void* state);
 void* microros_zero_allocate(size_t number_of_elements, size_t size_of_element, void* state);
+
 /* USER CODE END FunctionPrototypes */
 
-void StartRosTask(void* argument);
+void start_ros_task(void* argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -124,8 +130,8 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of rosTask */
-  rosTaskHandle = osThreadNew(StartRosTask, NULL, &rosTask_attributes);
+  /* creation of ros_task */
+  ros_taskHandle = osThreadNew(start_ros_task, NULL, &ros_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -136,17 +142,17 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_EVENTS */
 }
 
-/* USER CODE BEGIN Header_StartRosTask */
+/* USER CODE BEGIN Header_start_ros_task */
 /**
- * @brief  Function implementing the rosTask thread.
+ * @brief  Function implementing the ros_task thread.
  * @param  argument: Not used
  * @retval None
  */
-/* USER CODE END Header_StartRosTask */
-void StartRosTask(void* argument) {
+/* USER CODE END Header_start_ros_task */
+void start_ros_task(void* argument) {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
-  /* USER CODE BEGIN StartRosTask */
+  /* USER CODE BEGIN start_ros_task */
   /* Infinite loop */
 
   // micro-ROS configuration
@@ -190,34 +196,35 @@ void StartRosTask(void* argument) {
   RCCHECK(rclc_support_init_with_options(&support, 0, NULL, &init_options, &allocator));
 
   // create node
-  rclc_node_init_default(&node, "stm32_node", "", &support);  // Node Name: stm32_node, Namespace: ""
+  RCCHECK(rclc_node_init_default(&node, "stm32_node", "", &support));  // Node Name: stm32_node, Namespace: ""
 
   // create publisher
-  rclc_publisher_init_default(
+  RCCHECK(rclc_publisher_init_default(
       &publisher_button,
       &node,
       ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-      "/button");
+      "/button"));
 
-  GPIO_PinState last_button_state = false;
+  RCCHECK(rclc_publisher_init_default(&temp_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature), "/imu/temperature"));
+  bool last_button_state = false;
 
   for (;;) {
     // NOTE: The Button is inverted!
-    GPIO_PinState btn_state = HAL_GPIO_ReadPin(USER_BTN_GPIO_Port, USER_BTN_Pin);
+    bool btn_state = !(bool)HAL_GPIO_ReadPin(USER_BTN_GPIO_Port, USER_BTN_Pin);
 
     if (btn_state != last_button_state) {
       last_button_state = btn_state;
-      msg_button.data = (bool)btn_state;
+      msg_button.data = btn_state;
 
-      rcl_ret_t ret = rcl_publish(&publisher_button, &msg_button, NULL);
-      if (ret != RCL_RET_OK) {
-        printf("Error publishing (line %d)\n", __LINE__);
-      }
+      bno055_read_temp(&imu);
+      RCCHECK(rcl_publish(&temp_pup, &imu.temperature, NULL));
+
+      RCCHECK(rcl_publish(&publisher_button, &msg_button, NULL));
     }
 
     osDelay(10);
   }
-  /* USER CODE END StartRosTask */
+  /* USER CODE END start_ros_task */
 }
 
 /* Private application code --------------------------------------------------*/
