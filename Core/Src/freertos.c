@@ -32,12 +32,14 @@
 #include <rclc/rclc.h>
 #include <rmw_microros/rmw_microros.h>
 #include <rmw_microxrcedds_c/config.h>
+#include <sensor_msgs/msg/imu.h>
 #include <sensor_msgs/msg/temperature.h>
 #include <std_msgs/msg/bool.h>
 #include <stdbool.h>
 #include <uxr/client/transport.h>
 
 #include "bno055_dma.h"
+#include "utils.h"
 
 /* USER CODE END Includes */
 
@@ -68,9 +70,9 @@ typedef StaticTask_t osStaticThreadDef_t;
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 rcl_publisher_t temp_pup;
+rcl_publisher_t imu_pup;
 
 /* USER CODE END Variables */
-
 /* Definitions for ros_task */
 osThreadId_t ros_taskHandle;
 uint32_t ros_task_buffer[3000];
@@ -96,6 +98,8 @@ void microros_deallocate(void* pointer, void* state);
 void* microros_reallocate(void* pointer, size_t size, void* state);
 void* microros_zero_allocate(size_t number_of_elements, size_t size_of_element, void* state);
 
+void timer_1s_callback(rcl_timer_t* timer, int64_t last_call_time);
+void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time);
 /* USER CODE END FunctionPrototypes */
 
 void start_ros_task(void* argument);
@@ -205,7 +209,23 @@ void start_ros_task(void* argument) {
       ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
       "/button"));
 
-  RCCHECK(rclc_publisher_init_default(&temp_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature), "/imu/temperature"));
+  RCCHECK(rclc_publisher_init_default(&temp_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature), "/temperature"));
+
+  RCCHECK(rclc_publisher_init_default(&imu_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu"));
+
+  // Timers
+  rcl_timer_t timer_1s;
+  RCCHECK(rclc_timer_init_default(&timer_1s, &support, RCL_MS_TO_NS(1000), timer_1s_callback));
+
+  rcl_timer_t timer_100ms;
+  RCCHECK(rclc_timer_init_default(&timer_100ms, &support, RCL_MS_TO_NS(100), timer_100ms_callback));
+
+  // Init executor
+  rclc_executor_t executor;
+  RCCHECK(rclc_executor_init(&executor, &support.context, 2, &allocator));
+  RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
+  RCCHECK(rclc_executor_add_timer(&executor, &timer_100ms));
+
   bool last_button_state = false;
 
   for (;;) {
@@ -216,11 +236,10 @@ void start_ros_task(void* argument) {
       last_button_state = btn_state;
       msg_button.data = btn_state;
 
-      bno055_read_temp(&imu);
-      RCCHECK(rcl_publish(&temp_pup, &imu.temperature, NULL));
-
       RCCHECK(rcl_publish(&publisher_button, &msg_button, NULL));
     }
+
+    rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 
     osDelay(10);
   }
@@ -229,5 +248,40 @@ void start_ros_task(void* argument) {
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+void timer_1s_callback(rcl_timer_t* timer, int64_t last_call_time) {
+  (void)last_call_time;
+
+  if (timer != NULL) {
+    bno055_read_temp(&imu);
+    stamp_header(&imu.temperature.header.stamp);
+    RCCHECK(rcl_publish(&temp_pup, &imu.temperature, NULL));
+  }
+}
+
+void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time) {
+  (void)last_call_time;
+
+  if (timer != NULL) {
+    bno055_read_quaternion(&imu);
+    bno055_read_angular_velocity(&imu);
+    bno055_read_linear_acceleration(&imu);
+
+    sensor_msgs__msg__Imu imu_msg = {
+        .header = {
+            .frame_id = "imu",
+        },
+        .orientation_covariance = {0.0159, 0, 0, 0, 0.0159, 0, 0, 0, 0.0159},
+        .angular_velocity_covariance = {0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04},
+        .linear_acceleration_covariance = {0.017, 0, 0, 0, 0.017, 0, 0, 0, 0.017},
+        .orientation = imu.orientation,
+        .angular_velocity = imu.angular_velocity,
+        .linear_acceleration = imu.linear_acceleration,
+    };
+
+    stamp_header(&imu_msg.header.stamp);
+
+    RCCHECK(rcl_publish(&imu_pup, &imu_msg, NULL));
+  }
+}
 
 /* USER CODE END Application */

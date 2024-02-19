@@ -17,7 +17,11 @@
     "string__struct.h": "c",
     "string_utilities.h": "c",
     "cmsis_os.h": "c",
-    "i2c.h": "c"
+    "i2c.h": "c",
+    "macros.h": "c",
+    "imu.h": "c",
+    "temperature.h": "c",
+    "utils.h": "c"
   },
   "cortex-debug.armToolchainPath": "/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/12.2.1-1.2.1/.content/bin",
   "cortex-debug.openocdPath": "/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-1.1/.content/bin/openocd"

@@ -155,6 +155,14 @@ extern "C" {
 #define BNO055_GYR_AM_THRESH 0x1E
 #define BNO055_GYR_AM_SET 0x1F
 
+// Sclaes
+#define BNO055_ACCEL_SCALE 100
+#define BNO055_TEMP_SCALE 1
+#define BNO055_ANGULAR_RATE_SCALE 16
+#define BNO055_EULER_SCALE 16
+#define BNO055_MAG_SCALE 16
+#define BNO055_QUAT_SCALE (1 << 14)  // 2^14
+
 typedef enum {  // BNO-55 operation modes
   BNO055_OPERATION_MODE_CONFIG = 0x00,
   // Sensor Mode
@@ -171,15 +179,26 @@ typedef enum {  // BNO-55 operation modes
   BNO055_OPERATION_MODE_M4G,
   BNO055_OPERATION_MODE_NDOF_FMC_OFF,
   BNO055_OPERATION_MODE_NDOF  // 0x0C
-} BNO055_OPMODE_t;
+} bno055_opmode_t;
+
+typedef struct {
+  double w;
+  double x;
+  double y;
+  double z;
+} bno055_vector_t;
 
 typedef enum {
-  BNO055_SENSOR_NONE = 0x00,
-  BNO055_SENSOR_ORIENTATION,
-  BNO055_SENSOR_ANGULAR_VELOCITY,
-  BNO055_SENSOR_LINEAR_ACCELERATION,
-  BNO055_SENSOR_TEMP,
-} BNO055_SENSOR_t;
+  BNO055_DEVICE_NONE = 0x0,
+  BNO055_DEVICE_ACCELEROMETER = 0x08,  // Default: m/s²
+  BNO055_DEVICE_MAGNETOMETER = 0x0E,   // Default: uT
+  BNO055_DEVICE_GYROSCOPE = 0x14,      // Default: rad/s
+  BNO055_DEVICE_EULER = 0x1A,          // Default: degrees
+  BNO055_DEVICE_QUATERNION = 0x20,     // No units
+  BNO055_DEVICE_LINEARACCEL = 0x28,    // Default: m/s²
+  BNO055_DEVICE_GRAVITY = 0x2E,        // Default: m/s²
+  BNO055_DEVICE_TEMP = 0x34,           // Default: °C
+} bno055_devices_t;
 
 typedef struct BNO055_s {
   /* I2C */
@@ -189,12 +208,16 @@ typedef struct BNO055_s {
   /* DMA */
   uint8_t tx_buf[2];
   volatile uint8_t rx_buf[8];
-  BNO055_SENSOR_t reading_sensor;
+  bno055_devices_t reading_device;
 
   // Data
   geometry_msgs__msg__Quaternion orientation;
   geometry_msgs__msg__Vector3 angular_velocity;
   geometry_msgs__msg__Vector3 linear_acceleration;
+
+  // double orientation_covariance[9];
+  // double angular_velocity_covariance[9];
+  // double linear_acceleration_covariance[9];
 
   sensor_msgs__msg__Temperature temperature;
 
@@ -210,9 +233,12 @@ void bno055_read_DMA_complete(BNO055_t *imu);
 
 // Wrapper functions
 void bno055_set_page(BNO055_t *imu, uint8_t page);
-void bno055_set_operation_mode(BNO055_t *imu, BNO055_OPMODE_t opmode);
+void bno055_set_operation_mode(BNO055_t *imu, bno055_opmode_t opmode);
 
 void bno055_read_temp(BNO055_t *imu);
+void bno055_read_quaternion(BNO055_t *imu);
+void bno055_read_angular_velocity(BNO055_t *imu);
+void bno055_read_linear_acceleration(BNO055_t *imu);
 
 #ifdef __cplusplus
 }

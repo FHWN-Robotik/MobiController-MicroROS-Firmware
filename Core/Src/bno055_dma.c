@@ -4,6 +4,7 @@
 
 #include "i2c.h"
 #include "stdio.h"
+#include "utils.h"
 
 void check_status(BNO055_t *imu, HAL_StatusTypeDef status) {
   if (status == HAL_OK) {
@@ -63,6 +64,19 @@ void check_status(BNO055_t *imu, HAL_StatusTypeDef status) {
   }
 }
 
+void transform_vec(uint8_t buf[8], bno055_vector_t *vec, double scale, bool is_quaternion) {
+  if (is_quaternion) {
+    vec->w = (int16_t)((buf[1] << 8) | buf[0]) / scale;
+    vec->x = (int16_t)((buf[3] << 8) | buf[2]) / scale;
+    vec->y = (int16_t)((buf[5] << 8) | buf[4]) / scale;
+    vec->z = (int16_t)((buf[7] << 8) | buf[6]) / scale;
+  } else {
+    vec->x = (int16_t)((buf[1] << 8) | buf[0]) / scale;
+    vec->y = (int16_t)((buf[3] << 8) | buf[2]) / scale;
+    vec->z = (int16_t)((buf[5] << 8) | buf[4]) / scale;
+  }
+}
+
 // --------------------------------------------------------------------------------
 // Low level functions
 // --------------------------------------------------------------------------------
@@ -113,27 +127,62 @@ void bno055_read_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t len) {
 }
 
 void bno055_read_DMA_complete(BNO055_t *imu) {
-  switch (imu->reading_sensor) {
-    case BNO055_SENSOR_TEMP:
-      rcl_time_point_value_t now;
-      // rcutils_steady_time_now(&now);
+  bno055_vector_t vec = {.w = 0, .x = 0, .y = 0, .z = 0};
 
+  switch (imu->reading_device) {
+    case BNO055_DEVICE_TEMP:
       sensor_msgs__msg__Temperature temp = {
           .header = {
               .frame_id = "imu",
-              // .stamp = now,
           },
           .temperature = imu->rx_buf[0],
-          .variance = 0};
+          .variance = 0,
+      };
 
       imu->temperature = temp;
+      break;
+    case BNO055_DEVICE_QUATERNION:
+      transform_vec(imu->rx_buf, &vec, BNO055_QUAT_SCALE, true);
+
+      geometry_msgs__msg__Quaternion quat = {
+          .w = vec.w,
+          .x = vec.x,
+          .y = vec.y,
+          .z = vec.z,
+      };
+
+      imu->orientation = quat;
+      break;
+
+    case BNO055_DEVICE_LINEARACCEL:
+      transform_vec(imu->rx_buf, &vec, BNO055_ACCEL_SCALE, false);
+
+      geometry_msgs__msg__Vector3 lin_accel = {
+          .x = vec.x,
+          .y = vec.y,
+          .z = vec.z,
+      };
+
+      imu->linear_acceleration = lin_accel;
+      break;
+
+    case BNO055_DEVICE_GYROSCOPE:
+      transform_vec(imu->rx_buf, &vec, BNO055_ANGULAR_RATE_SCALE, false);
+
+      geometry_msgs__msg__Vector3 gyro = {
+          .x = vec.x,
+          .y = vec.y,
+          .z = vec.z,
+      };
+
+      imu->angular_velocity = gyro;
       break;
 
     default:
       break;
   }
 
-  imu->reading_sensor = BNO055_SENSOR_NONE;
+  imu->reading_device = BNO055_DEVICE_NONE;
 }
 
 // --------------------------------------------------------------------------------
@@ -144,12 +193,30 @@ void bno055_set_page(BNO055_t *imu, uint8_t page) {
   bno055_write_DMA(imu, BNO055_PAGE_ID, page);
 }
 
-void bno055_set_operation_mode(BNO055_t *imu, BNO055_OPMODE_t opmode) {
+void bno055_set_operation_mode(BNO055_t *imu, bno055_opmode_t opmode) {
   bno055_write_DMA(imu, BNO055_OPR_MODE, opmode);
 }
 
 void bno055_read_temp(BNO055_t *imu) {
   bno055_set_page(imu, 0);
   bno055_read_DMA(imu, BNO055_TEMP, 1);
-  imu->reading_sensor = BNO055_SENSOR_TEMP;
+  imu->reading_device = BNO055_DEVICE_TEMP;
+}
+
+void bno055_read_quaternion(BNO055_t *imu) {
+  bno055_set_page(imu, 0);
+  bno055_read_DMA(imu, BNO055_DEVICE_QUATERNION, 8);
+  imu->reading_device = BNO055_DEVICE_QUATERNION;
+}
+
+void bno055_read_angular_velocity(BNO055_t *imu) {
+  bno055_set_page(imu, 0);
+  bno055_read_DMA(imu, BNO055_DEVICE_GYROSCOPE, 6);
+  imu->reading_device = BNO055_DEVICE_GYROSCOPE;
+}
+
+void bno055_read_linear_acceleration(BNO055_t *imu) {
+  bno055_set_page(imu, 0);
+  bno055_read_DMA(imu, BNO055_DEVICE_LINEARACCEL, 6);
+  imu->reading_device = BNO055_DEVICE_LINEARACCEL;
 }
