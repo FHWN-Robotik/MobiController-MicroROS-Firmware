@@ -1,5 +1,6 @@
 #include "bno055_dma.h"
 
+#include <micro_ros_utilities/string_utilities.h>
 #include <rcl/rcl.h>
 
 #include "i2c.h"
@@ -90,6 +91,16 @@ void bno055_init(BNO055_t *imu, I2C_HandleTypeDef *hi2c_device, uint16_t device_
     printf("Error setting up IMU!\n");
   }
 
+  imu->temperature = sensor_msgs__msg__Temperature__create();
+  imu->temperature->header.frame_id = micro_ros_string_utilities_init("imu");
+  imu->temperature->variance = 0.0;
+
+  imu->orientation = geometry_msgs__msg__Quaternion__create();
+  imu->linear_acceleration = geometry_msgs__msg__Vector3__create();
+  imu->angular_velocity = geometry_msgs__msg__Vector3__create();
+
+  imu->calib_status = mobi_interfaces__srv__GetImuCalibStatus_Response__create();
+
   bno055_write_DMA(imu, BNO055_SYS_TRIGGER, 0x20);  // reset imu
 
   bno055_set_page(imu, 0);
@@ -131,62 +142,41 @@ void bno055_read_DMA_complete(BNO055_t *imu) {
 
   switch (imu->reading_device) {
     case BNO055_DEVICE_TEMP:
-      sensor_msgs__msg__Temperature temp = {
-          .header = {
-              .frame_id = "imu",
-          },
-          .temperature = imu->rx_buf[0],
-          .variance = 0,
-      };
-
-      imu->temperature = temp;
+      imu->temperature->temperature = imu->rx_buf[0];
       break;
+
     case BNO055_DEVICE_QUATERNION:
       transform_vec(imu->rx_buf, &vec, BNO055_QUAT_SCALE, true);
 
-      geometry_msgs__msg__Quaternion quat = {
-          .w = vec.w,
-          .x = vec.x,
-          .y = vec.y,
-          .z = vec.z,
-      };
-
-      imu->orientation = quat;
+      imu->orientation->w = vec.w;
+      imu->orientation->x = vec.x;
+      imu->orientation->y = vec.y;
+      imu->orientation->z = vec.z;
       break;
 
     case BNO055_DEVICE_LINEARACCEL:
       transform_vec(imu->rx_buf, &vec, BNO055_ACCEL_SCALE, false);
 
-      geometry_msgs__msg__Vector3 lin_accel = {
-          .x = vec.x,
-          .y = vec.y,
-          .z = vec.z,
-      };
-
-      imu->linear_acceleration = lin_accel;
+      imu->linear_acceleration->x = vec.x;
+      imu->linear_acceleration->y = vec.y;
+      imu->linear_acceleration->z = vec.z;
       break;
 
     case BNO055_DEVICE_GYROSCOPE:
       transform_vec(imu->rx_buf, &vec, BNO055_ANGULAR_RATE_SCALE, false);
 
-      geometry_msgs__msg__Vector3 gyro = {
-          .x = vec.x,
-          .y = vec.y,
-          .z = vec.z,
-      };
-
-      imu->angular_velocity = gyro;
+      imu->angular_velocity->x = vec.x;
+      imu->angular_velocity->y = vec.y;
+      imu->angular_velocity->z = vec.z;
       break;
+
     case BNO055_CALIB_STAT:
-      mobi_interfaces__srv__GetImuCalibStatus_Response calib_state = {
-          .system = (imu->rx_buf[0] >> 6) & 0x03,
-          .gyro = (imu->rx_buf[0] >> 4) & 0x03,
-          .accel = (imu->rx_buf[0] >> 2) & 0x03,
-          .mag = imu->rx_buf[0] & 0x03,
-      };
-
-      imu->calib_status = calib_state;
+      imu->calib_status->system = (imu->rx_buf[0] >> 6) & 0x03;
+      imu->calib_status->gyro = (imu->rx_buf[0] >> 4) & 0x03;
+      imu->calib_status->accel = (imu->rx_buf[0] >> 2) & 0x03;
+      imu->calib_status->mag = imu->rx_buf[0] & 0x03;
       break;
+
     default:
       break;
   }

@@ -26,7 +26,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <micro_ros_utilities/string_utilities.h>
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 #include <rclc/executor.h>
@@ -275,7 +274,7 @@ void timer_1s_callback(rcl_timer_t* timer, int64_t last_call_time) {
 
   if (timer != NULL) {
     bno055_read_temp(&imu);
-    stamp_header(&imu.temperature.header.stamp);
+    stamp_header(&imu.temperature->header.stamp);
     RCCHECK(rcl_publish(&temp_pup, &imu.temperature, NULL));
   }
 }
@@ -295,9 +294,9 @@ void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time) {
         .orientation_covariance = {0.0159, 0, 0, 0, 0.0159, 0, 0, 0, 0.0159},
         .angular_velocity_covariance = {0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04},
         .linear_acceleration_covariance = {0.017, 0, 0, 0, 0.017, 0, 0, 0, 0.017},
-        .orientation = imu.orientation,
-        .angular_velocity = imu.angular_velocity,
-        .linear_acceleration = imu.linear_acceleration,
+        .orientation = *imu.orientation,
+        .angular_velocity = *imu.angular_velocity,
+        .linear_acceleration = *imu.linear_acceleration,
     };
 
     stamp_header(&imu_msg.header.stamp);
@@ -319,7 +318,7 @@ void imu_get_calib_status_callback(const void* imu_get_calib_status_req, void* i
   while (!imu.reading_device == BNO055_DEVICE_NONE) {
   }
 
-  mobi_interfaces__srv__GetImuCalibStatus_Response__copy(&imu.calib_status, res);
+  mobi_interfaces__srv__GetImuCalibStatus_Response__copy(imu.calib_status, res);
 }
 
 /* USER CODE END Application */

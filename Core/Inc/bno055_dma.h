@@ -212,17 +212,17 @@ typedef struct BNO055_s {
   uint8_t reading_device;
 
   // Data
-  geometry_msgs__msg__Quaternion orientation;
-  geometry_msgs__msg__Vector3 angular_velocity;
-  geometry_msgs__msg__Vector3 linear_acceleration;
+  geometry_msgs__msg__Quaternion *orientation;
+  geometry_msgs__msg__Vector3 *angular_velocity;
+  geometry_msgs__msg__Vector3 *linear_acceleration;
 
   // double orientation_covariance[9];
   // double angular_velocity_covariance[9];
   // double linear_acceleration_covariance[9];
 
-  sensor_msgs__msg__Temperature temperature;
+  sensor_msgs__msg__Temperature *temperature;
 
-  mobi_interfaces__srv__GetImuCalibStatus_Response calib_status;
+  mobi_interfaces__srv__GetImuCalibStatus_Response *calib_status;
 
 } BNO055_t;
 
