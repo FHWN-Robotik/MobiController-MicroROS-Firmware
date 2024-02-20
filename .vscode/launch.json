@@ -3,7 +3,7 @@
     {
       "showDevDebugOutput": "parsed",
       "cwd": "${workspaceRoot}",
-      "executable": "./build/micro_ros_test.elf",
+      "executable": "./build/micro_ros_firmware.elf",
       "name": "Debug STM32",
       "request": "launch",
       "type": "cortex-debug",
@@ -17,7 +17,7 @@
     {
       "showDevDebugOutput": "parsed",
       "cwd": "${workspaceRoot}",
-      "executable": "./build/micro_ros_test.elf",
+      "executable": "./build/micro_ros_firmware.elf",
       "name": "Attach STM32",
       "request": "attach",
       "type": "cortex-debug",
