@@ -215,6 +215,9 @@ C_INCLUDES =  \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_msgs/msg \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_msgs/msg/detail \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_utilities \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/srv \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/srv/detail \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/nav_msgs/msg \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/nav_msgs/msg/detail \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/nav_msgs/srv \

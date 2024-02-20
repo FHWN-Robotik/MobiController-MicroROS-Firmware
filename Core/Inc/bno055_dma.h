@@ -8,6 +8,7 @@ extern "C" {
 #include "geometry_msgs/msg/quaternion.h"
 #include "geometry_msgs/msg/vector3.h"
 #include "i2c.h"
+#include "mobi_interfaces/srv/get_imu_calib_status.h"
 #include "sensor_msgs/msg/temperature.h"
 
 #define START_BYTE 0xAA
@@ -208,7 +209,7 @@ typedef struct BNO055_s {
   /* DMA */
   uint8_t tx_buf[2];
   volatile uint8_t rx_buf[8];
-  bno055_devices_t reading_device;
+  uint8_t reading_device;
 
   // Data
   geometry_msgs__msg__Quaternion orientation;
@@ -220,6 +221,8 @@ typedef struct BNO055_s {
   // double linear_acceleration_covariance[9];
 
   sensor_msgs__msg__Temperature temperature;
+
+  mobi_interfaces__srv__GetImuCalibStatus_Response calib_status;
 
 } BNO055_t;
 
@@ -239,6 +242,8 @@ void bno055_read_temp(BNO055_t *imu);
 void bno055_read_quaternion(BNO055_t *imu);
 void bno055_read_angular_velocity(BNO055_t *imu);
 void bno055_read_linear_acceleration(BNO055_t *imu);
+
+void bno055_read_calibration_state(BNO055_t *imu);
 
 #ifdef __cplusplus
 }

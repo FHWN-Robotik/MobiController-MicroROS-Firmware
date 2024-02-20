@@ -177,7 +177,16 @@ void bno055_read_DMA_complete(BNO055_t *imu) {
 
       imu->angular_velocity = gyro;
       break;
+    case BNO055_CALIB_STAT:
+      mobi_interfaces__srv__GetImuCalibStatus_Response calib_state = {
+          .system = (imu->rx_buf[0] >> 6) & 0x03,
+          .gyro = (imu->rx_buf[0] >> 4) & 0x03,
+          .accel = (imu->rx_buf[0] >> 2) & 0x03,
+          .mag = imu->rx_buf[0] & 0x03,
+      };
 
+      imu->calib_status = calib_state;
+      break;
     default:
       break;
   }
@@ -219,4 +228,11 @@ void bno055_read_linear_acceleration(BNO055_t *imu) {
   bno055_set_page(imu, 0);
   bno055_read_DMA(imu, BNO055_DEVICE_LINEARACCEL, 6);
   imu->reading_device = BNO055_DEVICE_LINEARACCEL;
+}
+
+void bno055_read_calibration_state(BNO055_t *imu) {
+  bno055_set_page(imu, 0);
+
+  bno055_read_DMA(imu, BNO055_CALIB_STAT, 1);
+  imu->reading_device = BNO055_CALIB_STAT;
 }

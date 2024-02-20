@@ -26,12 +26,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <micro_ros_utilities/string_utilities.h>
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 #include <rclc/executor.h>
 #include <rclc/rclc.h>
 #include <rmw_microros/rmw_microros.h>
 #include <rmw_microxrcedds_c/config.h>
+#include <rosidl_runtime_c/service_type_support_struct.h>
 #include <sensor_msgs/msg/imu.h>
 #include <sensor_msgs/msg/temperature.h>
 #include <std_msgs/msg/bool.h>
@@ -39,6 +41,7 @@
 #include <uxr/client/transport.h>
 
 #include "bno055_dma.h"
+#include "mobi_interfaces/srv/get_imu_calib_status.h"
 #include "utils.h"
 
 /* USER CODE END Includes */
@@ -69,6 +72,8 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+
+// Publishers
 rcl_publisher_t temp_pup;
 rcl_publisher_t imu_pup;
 
@@ -100,6 +105,7 @@ void* microros_zero_allocate(size_t number_of_elements, size_t size_of_element, 
 
 void timer_1s_callback(rcl_timer_t* timer, int64_t last_call_time);
 void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time);
+void imu_get_calib_status_callback(const void* imu_get_calib_status_req, void* imu_get_calib_status_res);
 /* USER CODE END FunctionPrototypes */
 
 void start_ros_task(void* argument);
@@ -181,8 +187,16 @@ void start_ros_task(void* argument) {
 
   // micro-ROS app
 
+  // Publisher
   rcl_publisher_t publisher_button;
   std_msgs__msg__Bool msg_button;
+
+  // Service server object
+  rcl_service_t imu_get_calib_status_srv = rcl_get_zero_initialized_service();
+
+  // Service msg objects
+  mobi_interfaces__srv__GetImuCalibStatus_Request imu_get_calib_status_req;
+  mobi_interfaces__srv__GetImuCalibStatus_Response imu_get_calib_status_res;
 
   rclc_support_t support;
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
@@ -213,6 +227,9 @@ void start_ros_task(void* argument) {
 
   RCCHECK(rclc_publisher_init_default(&imu_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu"));
 
+  // Initialize Services
+  RCCHECK(rclc_service_init_default(&imu_get_calib_status_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibStatus), "/imu_get_calib_status"));
+
   // Timers
   rcl_timer_t timer_1s;
   RCCHECK(rclc_timer_init_default(&timer_1s, &support, RCL_MS_TO_NS(1000), timer_1s_callback));
@@ -221,10 +238,14 @@ void start_ros_task(void* argument) {
   RCCHECK(rclc_timer_init_default(&timer_100ms, &support, RCL_MS_TO_NS(100), timer_100ms_callback));
 
   // Init executor
-  rclc_executor_t executor;
-  RCCHECK(rclc_executor_init(&executor, &support.context, 2, &allocator));
+  rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
+  RCCHECK(rclc_executor_init(&executor, &support.context, 3, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_100ms));
+  RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_status_srv, &imu_get_calib_status_req, &imu_get_calib_status_res, imu_get_calib_status_callback));
+
+  // Optional prepare for avoiding allocations during spin
+  rclc_executor_prepare(&executor);
 
   bool last_button_state = false;
 
@@ -243,6 +264,7 @@ void start_ros_task(void* argument) {
 
     osDelay(10);
   }
+
   /* USER CODE END start_ros_task */
 }
 
@@ -282,6 +304,22 @@ void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time) {
 
     RCCHECK(rcl_publish(&imu_pup, &imu_msg, NULL));
   }
+}
+
+// Service callbacks
+void imu_get_calib_status_callback(const void* imu_get_calib_status_req, void* imu_get_calib_status_res) {
+  // Cast messages to expected types
+  mobi_interfaces__srv__GetImuCalibStatus_Request* req = (mobi_interfaces__srv__GetImuCalibStatus_Request*)imu_get_calib_status_req;
+  mobi_interfaces__srv__GetImuCalibStatus_Response* res = (mobi_interfaces__srv__GetImuCalibStatus_Response*)imu_get_calib_status_res;
+
+  // Handle request message and set the response message values
+  printf("Client requested IMU calibration status.\n");
+
+  bno055_read_calibration_state(&imu);
+  while (!imu.reading_device == BNO055_DEVICE_NONE) {
+  }
+
+  mobi_interfaces__srv__GetImuCalibStatus_Response__copy(&imu.calib_status, res);
 }
 
 /* USER CODE END Application */
