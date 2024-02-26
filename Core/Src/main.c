@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "can.h"
 #include "cmsis_os.h"
 #include "dma.h"
 #include "gpio.h"
@@ -94,6 +95,7 @@ int main(void) {
   MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
+  MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
   printf("Initializing i2c devices...\n");
   bno055_init(&imu, &hi2c1, BNO055_I2C_ADDR_LO);
