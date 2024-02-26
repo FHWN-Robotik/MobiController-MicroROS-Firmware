@@ -24,32 +24,28 @@ extern "C" {
 #define BNO055_READ_TIMEOUT 100
 #define BNO055_WRITE_TIMEOUT 10
 
-#define ERROR_WRITE_SUCCESS 0x01  // Everything working as expected
-#define ERROR_WRITE_FAIL \
-  0x03                               // Check connection, protocol settings and operation more of BNO055
+#define ERROR_WRITE_SUCCESS 0x01     // Everything working as expected
+#define ERROR_WRITE_FAIL 0x03        // Check connection, protocol settings and operation more of BNO055
 #define ERROR_REGMAP_INV_ADDR 0x04   // Invalid register address
 #define ERROR_REGMAP_WRITE_DIS 0x05  // Register is read-only
 #define ERROR_WRONG_START_BYTE 0x06  // Check if the first byte
-#define ERROR_BUS_OVERRUN_ERR \
-  0x07  // Resend the command, BNO055 was not able to clear the receive buffer
-#define ERROR_MAX_LEN_ERR \
-  0x08                          // Split the command, max fire size can be up to 128 bytes
-#define ERROR_MIN_LEN_ERR 0x09  // Min length of data is less than 1
-#define ERROR_RECV_CHAR_TIMEOUT \
-  0x0A  // Decrease the waiting time between sending of two bytes of one frame
+#define ERROR_BUS_OVERRUN_ERR 0x07   // Resend the command, BNO055 was not able to clear the receive buffer
+#define ERROR_MAX_LEN_ERR 0x08       // Split the command, max fire size can be up to 128 bytes
+#define ERROR_MIN_LEN_ERR 0x09       // Min length of data is less than 1
+#define ERROR_RECV_CHAR_TIMEOUT 0x0A // Decrease the waiting time between sending of two bytes of one frame
 
 #define REG_WRITE 0x00
 #define REG_READ 0x01
 
 // Page 0
 #define BNO055_ID (0xA0)
-#define BNO055_CHIP_ID 0x00        // value: 0xA0
-#define BNO055_ACC_ID 0x01         // value: 0xFB
-#define BNO055_MAG_ID 0x02         // value: 0x32
-#define BNO055_GYRO_ID 0x03        // value: 0x0F
-#define BNO055_SW_REV_ID_LSB 0x04  // value: 0x08
-#define BNO055_SW_REV_ID_MSB 0x05  // value: 0x03
-#define BNO055_BL_REV_ID 0x06      // N/A
+#define BNO055_CHIP_ID 0x00       // value: 0xA0
+#define BNO055_ACC_ID 0x01        // value: 0xFB
+#define BNO055_MAG_ID 0x02        // value: 0x32
+#define BNO055_GYRO_ID 0x03       // value: 0x0F
+#define BNO055_SW_REV_ID_LSB 0x04 // value: 0x08
+#define BNO055_SW_REV_ID_MSB 0x05 // value: 0x03
+#define BNO055_BL_REV_ID 0x06     // N/A
 #define BNO055_PAGE_ID 0x07
 #define BNO055_ACC_DATA_X_LSB 0x08
 #define BNO055_ACC_DATA_X_MSB 0x09
@@ -164,9 +160,9 @@ extern "C" {
 #define BNO055_ANGULAR_RATE_SCALE 16
 #define BNO055_EULER_SCALE 16
 #define BNO055_MAG_SCALE 16
-#define BNO055_QUAT_SCALE (1 << 14)  // 2^14
+#define BNO055_QUAT_SCALE (1 << 14) // 2^14
 
-typedef enum {  // BNO-55 operation modes
+typedef enum { // BNO-55 operation modes
   BNO055_OPERATION_MODE_CONFIG = 0x00,
   // Sensor Mode
   BNO055_OPERATION_MODE_ACCONLY,
@@ -175,13 +171,13 @@ typedef enum {  // BNO-55 operation modes
   BNO055_OPERATION_MODE_ACCMAG,
   BNO055_OPERATION_MODE_ACCGYRO,
   BNO055_OPERATION_MODE_MAGGYRO,
-  BNO055_OPERATION_MODE_AMG,  // 0x07
-                              // Fusion Mode
+  BNO055_OPERATION_MODE_AMG, // 0x07
+                             // Fusion Mode
   BNO055_OPERATION_MODE_IMU,
   BNO055_OPERATION_MODE_COMPASS,
   BNO055_OPERATION_MODE_M4G,
   BNO055_OPERATION_MODE_NDOF_FMC_OFF,
-  BNO055_OPERATION_MODE_NDOF  // 0x0C
+  BNO055_OPERATION_MODE_NDOF // 0x0C
 } bno055_opmode_t;
 
 typedef struct {
@@ -193,14 +189,14 @@ typedef struct {
 
 typedef enum {
   BNO055_DEVICE_NONE = 0x0,
-  BNO055_DEVICE_ACCELEROMETER = 0x08,  // Default: m/s²
-  BNO055_DEVICE_MAGNETOMETER = 0x0E,   // Default: uT
-  BNO055_DEVICE_GYROSCOPE = 0x14,      // Default: rad/s
-  BNO055_DEVICE_EULER = 0x1A,          // Default: degrees
-  BNO055_DEVICE_QUATERNION = 0x20,     // No units
-  BNO055_DEVICE_LINEARACCEL = 0x28,    // Default: m/s²
-  BNO055_DEVICE_GRAVITY = 0x2E,        // Default: m/s²
-  BNO055_DEVICE_TEMP = 0x34,           // Default: °C
+  BNO055_DEVICE_ACCELEROMETER = 0x08, // Default: m/s²
+  BNO055_DEVICE_MAGNETOMETER = 0x0E,  // Default: uT
+  BNO055_DEVICE_GYROSCOPE = 0x14,     // Default: rad/s
+  BNO055_DEVICE_EULER = 0x1A,         // Default: degrees
+  BNO055_DEVICE_QUATERNION = 0x20,    // No units
+  BNO055_DEVICE_LINEARACCEL = 0x28,   // Default: m/s²
+  BNO055_DEVICE_GRAVITY = 0x2E,       // Default: m/s²
+  BNO055_DEVICE_TEMP = 0x34,          // Default: °C
 } bno055_devices_t;
 
 typedef struct BNO055_s {
@@ -210,7 +206,7 @@ typedef struct BNO055_s {
 
   /* DMA */
   uint8_t tx_buf[2];
-  volatile uint8_t rx_buf[22];  // Note: 22 bytes for calib data. Biggest data for sensors is 8 bytes for quaternion.
+  volatile uint8_t rx_buf[22]; // Note: 22 bytes for calib data. Biggest data for sensors is 8 bytes for quaternion.
   uint8_t reading_device;
 
   // Data

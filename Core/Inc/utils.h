@@ -7,7 +7,7 @@ extern "C" {
 
 #include <builtin_interfaces/msg/time.h>
 
-void stamp_header(builtin_interfaces__msg__Time* stamp);
+void stamp_header(builtin_interfaces__msg__Time *stamp);
 
 #ifdef __cplusplus
 }

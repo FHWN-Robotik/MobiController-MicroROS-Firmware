@@ -19,7 +19,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-
 #include "cmsis_os.h"
 #include "main.h"
 #include "task.h"
@@ -56,13 +55,13 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define RCCHECK(fn)                                                                \
-  {                                                                                \
-    rcl_ret_t temp_rc = fn;                                                        \
-    if ((temp_rc != RCL_RET_OK)) {                                                 \
-      printf("Failed status on line %d: %d. Aborting.\n", __LINE__, (int)temp_rc); \
-      return;                                                                      \
-    }                                                                              \
+#define RCCHECK(fn)                                                                                                    \
+  {                                                                                                                    \
+    rcl_ret_t temp_rc = fn;                                                                                            \
+    if ((temp_rc != RCL_RET_OK)) {                                                                                     \
+      printf("Failed status on line %d: %d. Aborting.\n", __LINE__, (int)temp_rc);                                     \
+      return;                                                                                                          \
+    }                                                                                                                  \
   }
 
 /* USER CODE END PD */
@@ -95,24 +94,24 @@ const osThreadAttr_t ros_task_attributes = {
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-bool cubemx_transport_open(struct uxrCustomTransport* transport);
-bool cubemx_transport_close(struct uxrCustomTransport* transport);
-size_t cubemx_transport_write(struct uxrCustomTransport* transport, const uint8_t* buf, size_t len, uint8_t* err);
-size_t cubemx_transport_read(struct uxrCustomTransport* transport, uint8_t* buf, size_t len, int timeout, uint8_t* err);
+bool cubemx_transport_open(struct uxrCustomTransport *transport);
+bool cubemx_transport_close(struct uxrCustomTransport *transport);
+size_t cubemx_transport_write(struct uxrCustomTransport *transport, const uint8_t *buf, size_t len, uint8_t *err);
+size_t cubemx_transport_read(struct uxrCustomTransport *transport, uint8_t *buf, size_t len, int timeout, uint8_t *err);
 
-void* microros_allocate(size_t size, void* state);
-void microros_deallocate(void* pointer, void* state);
-void* microros_reallocate(void* pointer, size_t size, void* state);
-void* microros_zero_allocate(size_t number_of_elements, size_t size_of_element, void* state);
+void *microros_allocate(size_t size, void *state);
+void microros_deallocate(void *pointer, void *state);
+void *microros_reallocate(void *pointer, size_t size, void *state);
+void *microros_zero_allocate(size_t number_of_elements, size_t size_of_element, void *state);
 
-void timer_1s_callback(rcl_timer_t* timer, int64_t last_call_time);
-void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time);
-void imu_get_calib_status_callback(const void* imu_get_calib_status_req, void* imu_get_calib_status_res);
-void imu_get_calib_data_callback(const void* imu_get_calib_data_req, void* imu_get_calib_data_res);
-void imu_set_calib_data_callback(const void* imu_set_calib_data_req, void* imu_set_calib_data_res);
+void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time);
+void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time);
+void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *imu_get_calib_status_res);
+void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_get_calib_data_res);
+void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_set_calib_data_res);
 /* USER CODE END FunctionPrototypes */
 
-void start_ros_task(void* argument);
+void start_ros_task(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -163,7 +162,7 @@ void MX_FREERTOS_Init(void) {
  * @retval None
  */
 /* USER CODE END Header_start_ros_task */
-void start_ros_task(void* argument) {
+void start_ros_task(void *argument) {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN start_ros_task */
@@ -171,13 +170,8 @@ void start_ros_task(void* argument) {
 
   // micro-ROS configuration
 
-  rmw_uros_set_custom_transport(
-      true,
-      NULL,
-      cubemx_transport_open,
-      cubemx_transport_close,
-      cubemx_transport_write,
-      cubemx_transport_read);
+  rmw_uros_set_custom_transport(true, NULL, cubemx_transport_open, cubemx_transport_close, cubemx_transport_write,
+                                cubemx_transport_read);
 
   rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
   freeRTOS_allocator.allocate = microros_allocate;
@@ -217,30 +211,37 @@ void start_ros_task(void* argument) {
   allocator = rcl_get_default_allocator();
 
   RCCHECK(rcl_init_options_init(&init_options, allocator));
-  RCCHECK(rcl_init_options_set_domain_id(&init_options, 255));  // Domain ID 255 is set so the Domain ID of the agent is used https://github.com/micro-ROS/micro-ROS-Agent/issues/182
+  RCCHECK(rcl_init_options_set_domain_id(&init_options,
+                                         255)); // Domain ID 255 is set so the Domain ID of the agent is used
+                                                // https://github.com/micro-ROS/micro-ROS-Agent/issues/182
 
   // create init_options
   // rclc_support_init(&support, 0, NULL, &allocator);
   RCCHECK(rclc_support_init_with_options(&support, 0, NULL, &init_options, &allocator));
 
   // create node
-  RCCHECK(rclc_node_init_default(&node, "stm32_node", "", &support));  // Node Name: stm32_node, Namespace: ""
+  RCCHECK(rclc_node_init_default(&node, "stm32_node", "",
+                                 &support)); // Node Name: stm32_node, Namespace: ""
 
   // create publisher
-  RCCHECK(rclc_publisher_init_default(
-      &publisher_button,
-      &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-      "/button"));
+  RCCHECK(rclc_publisher_init_default(&publisher_button, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+                                      "/button"));
 
-  RCCHECK(rclc_publisher_init_default(&temp_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature), "/temperature"));
+  RCCHECK(rclc_publisher_init_default(&temp_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature),
+                                      "/temperature"));
 
   RCCHECK(rclc_publisher_init_default(&imu_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu"));
 
   // Initialize Services
-  RCCHECK(rclc_service_init_default(&imu_get_calib_status_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibStatus), "/imu_get_calib_status"));
-  RCCHECK(rclc_service_init_default(&imu_get_calib_data_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibData), "/imu_get_calib_data"));
-  RCCHECK(rclc_service_init_default(&imu_set_calib_data_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetImuCalibData), "/imu_set_calib_data"));
+  RCCHECK(rclc_service_init_default(&imu_get_calib_status_srv, &node,
+                                    ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibStatus),
+                                    "/imu_get_calib_status"));
+  RCCHECK(rclc_service_init_default(&imu_get_calib_data_srv, &node,
+                                    ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibData),
+                                    "/imu_get_calib_data"));
+  RCCHECK(rclc_service_init_default(&imu_set_calib_data_srv, &node,
+                                    ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetImuCalibData),
+                                    "/imu_set_calib_data"));
 
   // Timers
   rcl_timer_t timer_1s;
@@ -254,9 +255,12 @@ void start_ros_task(void* argument) {
   RCCHECK(rclc_executor_init(&executor, &support.context, 5, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_100ms));
-  RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_status_srv, &imu_get_calib_status_req, &imu_get_calib_status_res, imu_get_calib_status_callback));
-  RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_data_srv, &imu_get_calib_data_req, &imu_get_calib_data_res, imu_get_calib_data_callback));
-  RCCHECK(rclc_executor_add_service(&executor, &imu_set_calib_data_srv, &imu_set_calib_data_req, &imu_set_calib_data_res, imu_set_calib_data_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_status_srv, &imu_get_calib_status_req,
+                                    &imu_get_calib_status_res, imu_get_calib_status_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_data_srv, &imu_get_calib_data_req,
+                                    &imu_get_calib_data_res, imu_get_calib_data_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &imu_set_calib_data_srv, &imu_set_calib_data_req,
+                                    &imu_set_calib_data_res, imu_set_calib_data_callback));
 
   // Optional prepare for avoiding allocations during spin
   rclc_executor_prepare(&executor);
@@ -284,7 +288,7 @@ void start_ros_task(void* argument) {
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-void timer_1s_callback(rcl_timer_t* timer, int64_t last_call_time) {
+void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time) {
   (void)last_call_time;
 
   if (timer != NULL) {
@@ -294,7 +298,7 @@ void timer_1s_callback(rcl_timer_t* timer, int64_t last_call_time) {
   }
 }
 
-void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time) {
+void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
   (void)last_call_time;
 
   if (timer != NULL) {
@@ -303,9 +307,10 @@ void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time) {
     bno055_read_linear_acceleration(&imu);
 
     sensor_msgs__msg__Imu imu_msg = {
-        .header = {
-            .frame_id = "imu",
-        },
+        .header =
+            {
+                .frame_id = "imu",
+            },
         .orientation_covariance = {0.0159, 0, 0, 0, 0.0159, 0, 0, 0, 0.0159},
         .angular_velocity_covariance = {0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04},
         .linear_acceleration_covariance = {0.017, 0, 0, 0, 0.017, 0, 0, 0, 0.017},
@@ -321,10 +326,12 @@ void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time) {
 }
 
 // Service callbacks
-void imu_get_calib_status_callback(const void* imu_get_calib_status_req, void* imu_get_calib_status_res) {
+void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *imu_get_calib_status_res) {
   // Cast messages to expected types
-  mobi_interfaces__srv__GetImuCalibStatus_Request* req = (mobi_interfaces__srv__GetImuCalibStatus_Request*)imu_get_calib_status_req;
-  mobi_interfaces__srv__GetImuCalibStatus_Response* res = (mobi_interfaces__srv__GetImuCalibStatus_Response*)imu_get_calib_status_res;
+  mobi_interfaces__srv__GetImuCalibStatus_Request *req =
+      (mobi_interfaces__srv__GetImuCalibStatus_Request *)imu_get_calib_status_req;
+  mobi_interfaces__srv__GetImuCalibStatus_Response *res =
+      (mobi_interfaces__srv__GetImuCalibStatus_Response *)imu_get_calib_status_res;
 
   // Handle request message and set the response message values
   printf("Client requested IMU calibration status.\n");
@@ -336,10 +343,12 @@ void imu_get_calib_status_callback(const void* imu_get_calib_status_req, void* i
   mobi_interfaces__srv__GetImuCalibStatus_Response__copy(imu.calib_status, res);
 }
 
-void imu_get_calib_data_callback(const void* imu_get_calib_data_req, void* imu_get_calib_data_res) {
+void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_get_calib_data_res) {
   // Cast messages to expected types
-  mobi_interfaces__srv__GetImuCalibData_Request* req = (mobi_interfaces__srv__GetImuCalibData_Request*)imu_get_calib_data_req;
-  mobi_interfaces__srv__GetImuCalibData_Response* res = (mobi_interfaces__srv__GetImuCalibData_Response*)imu_get_calib_data_res;
+  mobi_interfaces__srv__GetImuCalibData_Request *req =
+      (mobi_interfaces__srv__GetImuCalibData_Request *)imu_get_calib_data_req;
+  mobi_interfaces__srv__GetImuCalibData_Response *res =
+      (mobi_interfaces__srv__GetImuCalibData_Response *)imu_get_calib_data_res;
 
   // Handle request message and set the response message values
   printf("Client requested IMU calibration data.\n");
@@ -351,10 +360,12 @@ void imu_get_calib_data_callback(const void* imu_get_calib_data_req, void* imu_g
   mobi_interfaces__srv__GetImuCalibData_Response__copy(imu.calib_data, res);
 }
 
-void imu_set_calib_data_callback(const void* imu_set_calib_data_req, void* imu_set_calib_data_res) {
+void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_set_calib_data_res) {
   // Cast messages to expected types
-  mobi_interfaces__srv__SetImuCalibData_Request* req = (mobi_interfaces__srv__SetImuCalibData_Request*)imu_set_calib_data_req;
-  mobi_interfaces__srv__SetImuCalibData_Response* res = (mobi_interfaces__srv__SetImuCalibData_Response*)imu_set_calib_data_res;
+  mobi_interfaces__srv__SetImuCalibData_Request *req =
+      (mobi_interfaces__srv__SetImuCalibData_Request *)imu_set_calib_data_req;
+  mobi_interfaces__srv__SetImuCalibData_Response *res =
+      (mobi_interfaces__srv__SetImuCalibData_Response *)imu_set_calib_data_res;
 
   // Handle request message and set the response message values
   printf("Client set IMU calibration data.\n");

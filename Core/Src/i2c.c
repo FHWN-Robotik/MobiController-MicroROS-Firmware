@@ -30,6 +30,7 @@ DMA_HandleTypeDef hdma_i2c1_tx;
 
 /* I2C1 init function */
 void MX_I2C1_Init(void) {
+
   /* USER CODE BEGIN I2C1_Init 0 */
 
   /* USER CODE END I2C1_Init 0 */
@@ -66,7 +67,8 @@ void MX_I2C1_Init(void) {
   /* USER CODE END I2C1_Init 2 */
 }
 
-void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle) {
+void HAL_I2C_MspInit(I2C_HandleTypeDef *i2cHandle) {
+
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
   if (i2cHandle->Instance == I2C1) {
@@ -145,7 +147,8 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle) {
   }
 }
 
-void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle) {
+void HAL_I2C_MspDeInit(I2C_HandleTypeDef *i2cHandle) {
+
   if (i2cHandle->Instance == I2C1) {
     /* USER CODE BEGIN I2C1_MspDeInit 0 */
 
@@ -175,11 +178,11 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle) {
 }
 
 /* USER CODE BEGIN 1 */
-void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef* hi2c) {
+void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c) {
   // TX Done .. Do Something!
 }
 
-void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef* hi2c) {
+void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c) {
   if (hi2c->Instance != I2C1) {
     return;
   }

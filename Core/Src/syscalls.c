@@ -8,8 +8,9 @@
  * "Getting Newlib and printf to work with the STM32 and Code Sourcery Lite EABI"
  * https://sites.google.com/site/stm32discovery/open-source-development-with-the-stm32-discovery/getting-newlib-to-work-with-stm32-and-code-sourcery-lite-eabi
  *
- * Note that the read/write function here haven't actually been used. They should probably be revised to use the getchar/putchar
- * interrupt-based functions defined in usart.c. An example of how to do this is given at http://www.cs.indiana.edu/~geobrown/book.pdf
+ * Note that the read/write function here haven't actually been used. They should probably be revised to use the
+ * getchar/putchar interrupt-based functions defined in usart.c. An example of how to do this is given at
+ * http://www.cs.indiana.edu/~geobrown/book.pdf
  */
 #include <errno.h>
 #include <sys/stat.h>
@@ -51,9 +52,7 @@ void _exit(int status) {
   }
 }
 
-int _close(int file) {
-  return -1;
-}
+int _close(int file) { return -1; }
 /*
  execve
  Transfer control to a new process. Minimal implementation (for a system without processes):
@@ -84,12 +83,11 @@ int _fstat(int file, struct stat *st) {
 
 /*
  getpid
- Process-ID; this is sometimes used to generate strings unlikely to conflict with other processes. Minimal implementation, for a system without processes:
+ Process-ID; this is sometimes used to generate strings unlikely to conflict with other processes. Minimal
+ implementation, for a system without processes:
  */
 
-int _getpid() {
-  return 1;
-}
+int _getpid() { return 1; }
 
 /*
  isatty
@@ -97,14 +95,14 @@ int _getpid() {
  */
 int _isatty(int file) {
   switch (file) {
-    case STDOUT_FILENO:
-    case STDERR_FILENO:
-    case STDIN_FILENO:
-      return 1;
-    default:
-      // errno = ENOTTY;
-      errno = EBADF;
-      return 0;
+  case STDOUT_FILENO:
+  case STDERR_FILENO:
+  case STDIN_FILENO:
+    return 1;
+  default:
+    // errno = ENOTTY;
+    errno = EBADF;
+    return 0;
   }
 }
 
@@ -131,9 +129,7 @@ int _link(char *old, char *new) {
  lseek
  Set position in a file. Minimal implementation:
  */
-int _lseek(int file, int ptr, int dir) {
-  return 0;
-}
+int _lseek(int file, int ptr, int dir) { return 0; }
 
 /*
  sbrk
@@ -141,7 +137,7 @@ int _lseek(int file, int ptr, int dir) {
  Malloc and related functions depend on this
  */
 caddr_t _sbrk(int incr) {
-  extern char _ebss;  // Defined by the linker
+  extern char _ebss; // Defined by the linker
   static char *heap_end;
   char *prev_heap_end;
 
@@ -172,24 +168,24 @@ int _read(int file, char *ptr, int len) {
   int n;
   int num = 0;
   switch (file) {
-    case STDIN_FILENO:
-      for (n = 0; n < len; n++) {
+  case STDIN_FILENO:
+    for (n = 0; n < len; n++) {
 #if STDIN_USART == 1
-        while (!(USART1->ISR & USART_ISR_RXNE)) {
-        };
-        char c = USART1->RDR;
+      while (!(USART1->ISR & USART_ISR_RXNE)) {
+      };
+      char c = USART1->RDR;
 #elif STDIN_USART == 2
-        while (!(USART2->ISR & USART_ISR_RXNE)) {
-        };
-        char c = USART2->RDR;
+      while (!(USART2->ISR & USART_ISR_RXNE)) {
+      };
+      char c = USART2->RDR;
 #endif
-        *ptr++ = c;
-        num++;
-      }
-      break;
-    default:
-      errno = EBADF;
-      return -1;
+      *ptr++ = c;
+      num++;
+    }
+    break;
+  default:
+    errno = EBADF;
+    return -1;
   }
   return num;
 }
@@ -210,9 +206,7 @@ int _stat(const char *filepath, struct stat *st) {
  Timing information for current process. Minimal implementation:
  */
 
-clock_t _times(struct tms *buf) {
-  return -1;
-}
+clock_t _times(struct tms *buf) { return -1; }
 
 /*
  unlink
@@ -240,39 +234,39 @@ int _wait(int *status) {
 int _write(int file, char *ptr, int len) {
   int n;
   switch (file) {
-    case STDOUT_FILENO: /*stdout*/
-      for (n = 0; n < len; n++) {
+  case STDOUT_FILENO: /*stdout*/
+    for (n = 0; n < len; n++) {
 #if STDOUT_USART == 1
-        while (!(USART1->ISR & USART_ISR_TXE)) {
-        };
+      while (!(USART1->ISR & USART_ISR_TXE)) {
+      };
 
-        USART1->TDR = *ptr++;
+      USART1->TDR = *ptr++;
 #elif STDOUT_USART == 2
-        while (!(USART2->ISR & USART_ISR_TXE)) {
-        };
+      while (!(USART2->ISR & USART_ISR_TXE)) {
+      };
 
-        USART2->TDR = *ptr++;
+      USART2->TDR = *ptr++;
 
 #endif
-      }
-      break;
-    case STDERR_FILENO: /* stderr */
-      for (n = 0; n < len; n++) {
+    }
+    break;
+  case STDERR_FILENO: /* stderr */
+    for (n = 0; n < len; n++) {
 #if STDERR_USART == 1
-        while (!(USART1->ISR & USART_ISR_TXE)) {
-        };
+      while (!(USART1->ISR & USART_ISR_TXE)) {
+      };
 
-        USART1->TDR = *ptr++;
+      USART1->TDR = *ptr++;
 #elif STDERR_USART == 2
-        while (!(USART2->ISR & USART_ISR_TXE)) {
-        };
-        USART2->TDR = *ptr++;
+      while (!(USART2->ISR & USART_ISR_TXE)) {
+      };
+      USART2->TDR = *ptr++;
 #endif
-      }
-      break;
-    default:
-      errno = EBADF;
-      return -1;
+    }
+    break;
+  default:
+    errno = EBADF;
+    return -1;
   }
   return len;
 }

@@ -2,7 +2,7 @@
 
 #include "rcutils/time.h"
 
-void stamp_header(builtin_interfaces__msg__Time* stamp) {
+void stamp_header(builtin_interfaces__msg__Time *stamp) {
   rcutils_time_point_value_t now;
   RCUTILS_STEADY_TIME(&now);
 

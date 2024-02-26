@@ -104,7 +104,7 @@ void bno055_init(BNO055_t *imu, I2C_HandleTypeDef *hi2c_device, uint16_t device_
   imu->calib_status = mobi_interfaces__srv__GetImuCalibStatus_Response__create();
   imu->calib_data = mobi_interfaces__srv__GetImuCalibData_Response__create();
 
-  bno055_write_DMA(imu, BNO055_SYS_TRIGGER, 0x20);  // reset imu
+  bno055_write_DMA(imu, BNO055_SYS_TRIGGER, 0x20); // reset imu
 
   bno055_set_page(imu, 0);
   bno055_write_DMA(imu, BNO055_SYS_TRIGGER, 0x0);
@@ -123,7 +123,8 @@ void bno055_write_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t data) {
   while (imu->i2c_handle->State != HAL_I2C_STATE_READY) {
   }
 
-  HAL_StatusTypeDef status = HAL_I2C_Master_Transmit_DMA(imu->i2c_handle, imu->device_address << 1, imu->tx_buf, sizeof(imu->tx_buf));
+  HAL_StatusTypeDef status =
+      HAL_I2C_Master_Transmit_DMA(imu->i2c_handle, imu->device_address << 1, imu->tx_buf, sizeof(imu->tx_buf));
   check_status(imu, status);
 }
 
@@ -136,7 +137,8 @@ void bno055_read_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t len) {
   while (imu->i2c_handle->State != HAL_I2C_STATE_READY) {
   }
 
-  HAL_StatusTypeDef status = HAL_I2C_Master_Receive_DMA(imu->i2c_handle, imu->device_address << 1, (uint8_t *)imu->rx_buf, len);
+  HAL_StatusTypeDef status =
+      HAL_I2C_Master_Receive_DMA(imu->i2c_handle, imu->device_address << 1, (uint8_t *)imu->rx_buf, len);
   check_status(imu, status);
 }
 
@@ -144,72 +146,72 @@ void bno055_read_DMA_complete(BNO055_t *imu) {
   bno055_vector_t vec = {.w = 0, .x = 0, .y = 0, .z = 0};
 
   switch (imu->reading_device) {
-    case BNO055_DEVICE_TEMP:
-      imu->temperature->temperature = imu->rx_buf[0];
-      break;
+  case BNO055_DEVICE_TEMP:
+    imu->temperature->temperature = imu->rx_buf[0];
+    break;
 
-    case BNO055_DEVICE_QUATERNION:
-      transform_vec(imu->rx_buf, &vec, BNO055_QUAT_SCALE, true);
+  case BNO055_DEVICE_QUATERNION:
+    transform_vec(imu->rx_buf, &vec, BNO055_QUAT_SCALE, true);
 
-      imu->orientation->w = vec.w;
-      imu->orientation->x = vec.x;
-      imu->orientation->y = vec.y;
-      imu->orientation->z = vec.z;
-      break;
+    imu->orientation->w = vec.w;
+    imu->orientation->x = vec.x;
+    imu->orientation->y = vec.y;
+    imu->orientation->z = vec.z;
+    break;
 
-    case BNO055_DEVICE_LINEARACCEL:
-      transform_vec(imu->rx_buf, &vec, BNO055_ACCEL_SCALE, false);
+  case BNO055_DEVICE_LINEARACCEL:
+    transform_vec(imu->rx_buf, &vec, BNO055_ACCEL_SCALE, false);
 
-      imu->linear_acceleration->x = vec.x;
-      imu->linear_acceleration->y = vec.y;
-      imu->linear_acceleration->z = vec.z;
-      break;
+    imu->linear_acceleration->x = vec.x;
+    imu->linear_acceleration->y = vec.y;
+    imu->linear_acceleration->z = vec.z;
+    break;
 
-    case BNO055_DEVICE_GYROSCOPE:
-      transform_vec(imu->rx_buf, &vec, BNO055_ANGULAR_RATE_SCALE, false);
+  case BNO055_DEVICE_GYROSCOPE:
+    transform_vec(imu->rx_buf, &vec, BNO055_ANGULAR_RATE_SCALE, false);
 
-      imu->angular_velocity->x = vec.x;
-      imu->angular_velocity->y = vec.y;
-      imu->angular_velocity->z = vec.z;
-      break;
+    imu->angular_velocity->x = vec.x;
+    imu->angular_velocity->y = vec.y;
+    imu->angular_velocity->z = vec.z;
+    break;
 
-    case BNO055_CALIB_STAT:
-      imu->calib_status->system = (imu->rx_buf[0] >> 6) & 0x03;
-      imu->calib_status->gyro = (imu->rx_buf[0] >> 4) & 0x03;
-      imu->calib_status->accel = (imu->rx_buf[0] >> 2) & 0x03;
-      imu->calib_status->mag = imu->rx_buf[0] & 0x03;
-      break;
+  case BNO055_CALIB_STAT:
+    imu->calib_status->system = (imu->rx_buf[0] >> 6) & 0x03;
+    imu->calib_status->gyro = (imu->rx_buf[0] >> 4) & 0x03;
+    imu->calib_status->accel = (imu->rx_buf[0] >> 2) & 0x03;
+    imu->calib_status->mag = imu->rx_buf[0] & 0x03;
+    break;
 
-    case BNO055_ACC_OFFSET_X_LSB:  // Calib Data
-      // Assumes little endian processor
+  case BNO055_ACC_OFFSET_X_LSB: // Calib Data
+    // Assumes little endian processor
 
-      bno055_vector_t vec = {.w = 0, .x = 0, .y = 0, .z = 0};
+    bno055_vector_t vec = {.w = 0, .x = 0, .y = 0, .z = 0};
 
-      transform_vec(imu->rx_buf, &vec, 1, false);
-      imu->calib_data->offset_accelerometer_x = vec.x;
-      imu->calib_data->offset_accelerometer_y = vec.y;
-      imu->calib_data->offset_accelerometer_z = vec.z;
+    transform_vec(imu->rx_buf, &vec, 1, false);
+    imu->calib_data->offset_accelerometer_x = vec.x;
+    imu->calib_data->offset_accelerometer_y = vec.y;
+    imu->calib_data->offset_accelerometer_z = vec.z;
 
-      transform_vec(imu->rx_buf + 6, &vec, 1, false);
-      imu->calib_data->offset_magnetometer_x = vec.x;
-      imu->calib_data->offset_magnetometer_y = vec.y;
-      imu->calib_data->offset_magnetometer_z = vec.z;
+    transform_vec(imu->rx_buf + 6, &vec, 1, false);
+    imu->calib_data->offset_magnetometer_x = vec.x;
+    imu->calib_data->offset_magnetometer_y = vec.y;
+    imu->calib_data->offset_magnetometer_z = vec.z;
 
-      transform_vec(imu->rx_buf + 12, &vec, 1, false);
-      imu->calib_data->offset_gyroscope_x = vec.x;
-      imu->calib_data->offset_gyroscope_y = vec.y;
-      imu->calib_data->offset_gyroscope_z = vec.z;
+    transform_vec(imu->rx_buf + 12, &vec, 1, false);
+    imu->calib_data->offset_gyroscope_x = vec.x;
+    imu->calib_data->offset_gyroscope_y = vec.y;
+    imu->calib_data->offset_gyroscope_z = vec.z;
 
-      imu->calib_data->radius_accelerometer = (int16_t)((imu->rx_buf[19] << 8) | imu->rx_buf[18]);
+    imu->calib_data->radius_accelerometer = (int16_t)((imu->rx_buf[19] << 8) | imu->rx_buf[18]);
 
-      imu->calib_data->radius_magnetometer = (int16_t)((imu->rx_buf[21] << 8) | imu->rx_buf[20]);
+    imu->calib_data->radius_magnetometer = (int16_t)((imu->rx_buf[21] << 8) | imu->rx_buf[20]);
 
-      // Set the IMU back into NDOF mode.
-      bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_NDOF);
-      break;
+    // Set the IMU back into NDOF mode.
+    bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_NDOF);
+    break;
 
-    default:
-      break;
+  default:
+    break;
   }
 
   imu->reading_device = BNO055_DEVICE_NONE;
@@ -219,9 +221,7 @@ void bno055_read_DMA_complete(BNO055_t *imu) {
 // Wrapper functions
 // --------------------------------------------------------------------------------
 
-void bno055_set_page(BNO055_t *imu, uint8_t page) {
-  bno055_write_DMA(imu, BNO055_PAGE_ID, page);
-}
+void bno055_set_page(BNO055_t *imu, uint8_t page) { bno055_write_DMA(imu, BNO055_PAGE_ID, page); }
 
 void bno055_set_operation_mode(BNO055_t *imu, bno055_opmode_t opmode) {
   bno055_write_DMA(imu, BNO055_OPR_MODE, opmode);
