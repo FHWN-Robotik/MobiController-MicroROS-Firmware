@@ -38,6 +38,7 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 extern struct BNO055_s imu;
+extern struct canlib_s can;
 
 /* USER CODE END ET */
 

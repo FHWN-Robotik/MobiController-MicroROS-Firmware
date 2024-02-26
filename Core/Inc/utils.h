@@ -9,6 +9,10 @@ extern "C" {
 
 void stamp_header(builtin_interfaces__msg__Time *stamp);
 
+static uint16_t twos_complement(int16_t num) { return (uint16_t)(~num + 1); }
+
+double clamp(double d, double min, double max);
+
 #ifdef __cplusplus
 }
 #endif

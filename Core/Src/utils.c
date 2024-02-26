@@ -9,3 +9,8 @@ void stamp_header(builtin_interfaces__msg__Time *stamp) {
   stamp->sec = RCUTILS_NS_TO_S(now);
   stamp->nanosec = now;
 }
+
+double clamp(double d, double min, double max) {
+  const double t = d < min ? min : d;
+  return t > max ? max : t;
+}

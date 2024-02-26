@@ -37,6 +37,8 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 Core/Src/bno055_dma.c \
+Core/Src/can.c \
+Core/Src/canlib.c \
 Core/Src/dma.c \
 Core/Src/freertos.c \
 Core/Src/gpio.c \
@@ -50,6 +52,7 @@ Core/Src/system_stm32l4xx.c \
 Core/Src/usart.c \
 Core/Src/utils.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c \
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_can.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_cortex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c \
@@ -340,7 +343,7 @@ LIBDIR = \
 
 
 # Additional LD Flags from config file
-ADDITIONALLDFLAGS = -Wl,--print-memory-usage -specs=nano.specs micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/libmicroros.a 
+ADDITIONALLDFLAGS = -Wl,--print-memory-usage -specs=nano.specs -u _printf_float micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/libmicroros.a 
 
 LDFLAGS = $(MCU) $(ADDITIONALLDFLAGS) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 

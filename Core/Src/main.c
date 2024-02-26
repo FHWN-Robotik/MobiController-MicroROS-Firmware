@@ -29,6 +29,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bno055_dma.h"
+#include "canlib.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,6 +51,7 @@
 
 /* USER CODE BEGIN PV */
 BNO055_t imu;
+canlib_t can;
 
 /* USER CODE END PV */
 
@@ -99,6 +101,9 @@ int main(void) {
   /* USER CODE BEGIN 2 */
   printf("Initializing i2c devices...\n");
   bno055_init(&imu, &hi2c1, BNO055_I2C_ADDR_LO);
+
+  printf("Starting CAN...\n");
+  canlib_init(&can, &hcan1);
 
   printf("Starting FreeRTOS...\n");
   /* USER CODE END 2 */
@@ -153,7 +158,7 @@ void SystemClock_Config(void) {
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 20;
+  RCC_OscInitStruct.PLL.PLLN = 40;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
@@ -169,7 +174,7 @@ void SystemClock_Config(void) {
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK) {
     Error_Handler();
   }
 

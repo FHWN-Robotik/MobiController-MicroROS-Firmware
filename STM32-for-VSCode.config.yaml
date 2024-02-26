@@ -47,6 +47,7 @@ assemblyFlags:
 
 linkerFlags: 
   - -Wl,--print-memory-usage
+  - -u _printf_float # for printing floats
   - micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/libmicroros.a # micro-ros
  
 

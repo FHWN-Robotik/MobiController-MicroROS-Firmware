@@ -25,6 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <geometry_msgs/msg/twist.h>
 #include <micro_ros_utilities/string_utilities.h>
 #include <mobi_interfaces/srv/get_imu_calib_data.h>
 #include <mobi_interfaces/srv/get_imu_calib_status.h>
@@ -43,6 +44,7 @@
 #include <uxr/client/transport.h>
 
 #include "bno055_dma.h"
+#include "canlib.h"
 #include "utils.h"
 
 /* USER CODE END Includes */
@@ -78,6 +80,10 @@ typedef StaticTask_t osStaticThreadDef_t;
 rcl_publisher_t temp_pup;
 rcl_publisher_t imu_pup;
 
+// Subscribers
+rcl_subscription_t cmd_vel_sub;
+geometry_msgs__msg__Twist cmd_vel_msg;
+
 /* USER CODE END Variables */
 /* Definitions for ros_task */
 osThreadId_t ros_taskHandle;
@@ -109,6 +115,7 @@ void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time);
 void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *imu_get_calib_status_res);
 void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_get_calib_data_res);
 void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_set_calib_data_res);
+void cmd_vel_callback(const void *msgin);
 /* USER CODE END FunctionPrototypes */
 
 void start_ros_task(void *argument);
@@ -211,17 +218,17 @@ void start_ros_task(void *argument) {
   allocator = rcl_get_default_allocator();
 
   RCCHECK(rcl_init_options_init(&init_options, allocator));
-  RCCHECK(rcl_init_options_set_domain_id(&init_options,
-                                         255)); // Domain ID 255 is set so the Domain ID of the agent is used
-                                                // https://github.com/micro-ROS/micro-ROS-Agent/issues/182
+
+  // Domain ID 255 is set so the Domain ID of the agent is used
+  // https://github.com/micro-ROS/micro-ROS-Agent/issues/182
+  RCCHECK(rcl_init_options_set_domain_id(&init_options, 255));
 
   // create init_options
   // rclc_support_init(&support, 0, NULL, &allocator);
   RCCHECK(rclc_support_init_with_options(&support, 0, NULL, &init_options, &allocator));
 
-  // create node
-  RCCHECK(rclc_node_init_default(&node, "stm32_node", "",
-                                 &support)); // Node Name: stm32_node, Namespace: ""
+  // create node -- Node Name: stm32_node, Namespace: ""
+  RCCHECK(rclc_node_init_default(&node, "stm32_node", "", &support));
 
   // create publisher
   RCCHECK(rclc_publisher_init_default(&publisher_button, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
@@ -231,6 +238,10 @@ void start_ros_task(void *argument) {
                                       "/temperature"));
 
   RCCHECK(rclc_publisher_init_default(&imu_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu"));
+
+  // create subsribers
+  RCCHECK(rclc_subscription_init_default(&cmd_vel_sub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
+                                         "/cmd_vel"));
 
   // Initialize Services
   RCCHECK(rclc_service_init_default(&imu_get_calib_status_srv, &node,
@@ -252,9 +263,16 @@ void start_ros_task(void *argument) {
 
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 5, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 6, &allocator));
+
+  // Add Timers to executor
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_100ms));
+
+  // Add Subscriptions to executor
+  RCCHECK(rclc_executor_add_subscription(&executor, &cmd_vel_sub, &cmd_vel_msg, &cmd_vel_callback, ON_NEW_DATA));
+
+  // Add Services to executor
   RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_status_srv, &imu_get_calib_status_req,
                                     &imu_get_calib_status_res, imu_get_calib_status_callback));
   RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_data_srv, &imu_get_calib_data_req,
@@ -263,7 +281,7 @@ void start_ros_task(void *argument) {
                                     &imu_set_calib_data_res, imu_set_calib_data_callback));
 
   // Optional prepare for avoiding allocations during spin
-  rclc_executor_prepare(&executor);
+  RCCHECK(rclc_executor_prepare(&executor));
 
   bool last_button_state = false;
 
@@ -376,4 +394,21 @@ void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_s
   res->message = micro_ros_string_utilities_init("Set IMU calibration data successfully.\n");
 }
 
+void cmd_vel_callback(const void *msgin) {
+  // Cast received message to used type
+  const geometry_msgs__msg__Twist *msg = (const geometry_msgs__msg__Twist *)msgin;
+
+  // Process message
+  printf("CMD_VEL --> x: %f, y: %f, phi: %f\n", msg->linear.x, msg->linear.y, msg->angular.z);
+
+  int16_t speed = 500;
+  int16_t rot_speed = 2000;
+
+  int16_t vx = speed * msg->linear.x;
+  int16_t vy = speed * msg->linear.y;
+  int16_t vphi = rot_speed * msg->angular.z;
+
+  HAL_StatusTypeDef status = canlib_drive(&can, vx, vy, vphi);
+  printf("Status: %d\n", status);
+}
 /* USER CODE END Application */
