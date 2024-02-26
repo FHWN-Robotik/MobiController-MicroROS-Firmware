@@ -99,7 +99,10 @@ void bno055_init(BNO055_t *imu, I2C_HandleTypeDef *hi2c_device, uint16_t device_
   imu->linear_acceleration = geometry_msgs__msg__Vector3__create();
   imu->angular_velocity = geometry_msgs__msg__Vector3__create();
 
+  imu->test = 0xffff;
+
   imu->calib_status = mobi_interfaces__srv__GetImuCalibStatus_Response__create();
+  imu->calib_data = mobi_interfaces__srv__GetImuCalibData_Response__create();
 
   bno055_write_DMA(imu, BNO055_SYS_TRIGGER, 0x20);  // reset imu
 
@@ -177,6 +180,34 @@ void bno055_read_DMA_complete(BNO055_t *imu) {
       imu->calib_status->mag = imu->rx_buf[0] & 0x03;
       break;
 
+    case BNO055_ACC_OFFSET_X_LSB:  // Calib Data
+      // Assumes little endian processor
+
+      bno055_vector_t vec = {.w = 0, .x = 0, .y = 0, .z = 0};
+
+      transform_vec(imu->rx_buf, &vec, 1, false);
+      imu->calib_data->offset_accelerometer_x = vec.x;
+      imu->calib_data->offset_accelerometer_y = vec.y;
+      imu->calib_data->offset_accelerometer_z = vec.z;
+
+      transform_vec(imu->rx_buf + 6, &vec, 1, false);
+      imu->calib_data->offset_magnetometer_x = vec.x;
+      imu->calib_data->offset_magnetometer_y = vec.y;
+      imu->calib_data->offset_magnetometer_z = vec.z;
+
+      transform_vec(imu->rx_buf + 12, &vec, 1, false);
+      imu->calib_data->offset_gyroscope_x = vec.x;
+      imu->calib_data->offset_gyroscope_y = vec.y;
+      imu->calib_data->offset_gyroscope_z = vec.z;
+
+      imu->calib_data->radius_accelerometer = (int16_t)((imu->rx_buf[19] << 8) | imu->rx_buf[18]);
+
+      imu->calib_data->radius_magnetometer = (int16_t)((imu->rx_buf[21] << 8) | imu->rx_buf[20]);
+
+      // Set the IMU back into NDOF mode.
+      bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_NDOF);
+      break;
+
     default:
       break;
   }
@@ -225,4 +256,15 @@ void bno055_read_calibration_state(BNO055_t *imu) {
 
   bno055_read_DMA(imu, BNO055_CALIB_STAT, 1);
   imu->reading_device = BNO055_CALIB_STAT;
+}
+
+void bno055_read_calibration_data(BNO055_t *imu) {
+  bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_CONFIG);
+
+  bno055_set_page(imu, 0);
+  bno055_read_DMA(imu, BNO055_ACC_OFFSET_X_LSB, 22);
+
+  imu->reading_device = BNO055_ACC_OFFSET_X_LSB;
+
+  // Setting op mode back to NDOF after receiving the data.
 }

@@ -40,6 +40,7 @@
 #include <uxr/client/transport.h>
 
 #include "bno055_dma.h"
+#include "mobi_interfaces/srv/get_imu_calib_data.h"
 #include "mobi_interfaces/srv/get_imu_calib_status.h"
 #include "utils.h"
 
@@ -105,6 +106,7 @@ void* microros_zero_allocate(size_t number_of_elements, size_t size_of_element, 
 void timer_1s_callback(rcl_timer_t* timer, int64_t last_call_time);
 void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time);
 void imu_get_calib_status_callback(const void* imu_get_calib_status_req, void* imu_get_calib_status_res);
+void imu_get_calib_data_callback(const void* imu_get_calib_data_req, void* imu_get_calib_data_res);
 /* USER CODE END FunctionPrototypes */
 
 void start_ros_task(void* argument);
@@ -192,10 +194,12 @@ void start_ros_task(void* argument) {
 
   // Service server object
   rcl_service_t imu_get_calib_status_srv = rcl_get_zero_initialized_service();
-
-  // Service msg objects
   mobi_interfaces__srv__GetImuCalibStatus_Request imu_get_calib_status_req;
   mobi_interfaces__srv__GetImuCalibStatus_Response imu_get_calib_status_res;
+
+  rcl_service_t imu_get_calib_data_srv = rcl_get_zero_initialized_service();
+  mobi_interfaces__srv__GetImuCalibData_Request imu_get_calib_data_req;
+  mobi_interfaces__srv__GetImuCalibData_Response imu_get_calib_data_res;
 
   rclc_support_t support;
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
@@ -228,6 +232,7 @@ void start_ros_task(void* argument) {
 
   // Initialize Services
   RCCHECK(rclc_service_init_default(&imu_get_calib_status_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibStatus), "/imu_get_calib_status"));
+  RCCHECK(rclc_service_init_default(&imu_get_calib_data_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibData), "/imu_get_calib_data"));
 
   // Timers
   rcl_timer_t timer_1s;
@@ -238,10 +243,11 @@ void start_ros_task(void* argument) {
 
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 3, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 4, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_100ms));
   RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_status_srv, &imu_get_calib_status_req, &imu_get_calib_status_res, imu_get_calib_status_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_data_srv, &imu_get_calib_data_req, &imu_get_calib_data_res, imu_get_calib_data_callback));
 
   // Optional prepare for avoiding allocations during spin
   rclc_executor_prepare(&executor);
@@ -319,6 +325,21 @@ void imu_get_calib_status_callback(const void* imu_get_calib_status_req, void* i
   }
 
   mobi_interfaces__srv__GetImuCalibStatus_Response__copy(imu.calib_status, res);
+}
+
+void imu_get_calib_data_callback(const void* imu_get_calib_data_req, void* imu_get_calib_data_res) {
+  // Cast messages to expected types
+  mobi_interfaces__srv__GetImuCalibData_Request* req = (mobi_interfaces__srv__GetImuCalibData_Request*)imu_get_calib_data_req;
+  mobi_interfaces__srv__GetImuCalibData_Response* res = (mobi_interfaces__srv__GetImuCalibData_Response*)imu_get_calib_data_res;
+
+  // Handle request message and set the response message values
+  printf("Client requested IMU calibration data.\n");
+
+  bno055_read_calibration_data(&imu);
+  while (!imu.reading_device == BNO055_DEVICE_NONE) {
+  }
+
+  mobi_interfaces__srv__GetImuCalibData_Response__copy(imu.calib_data, res);
 }
 
 /* USER CODE END Application */

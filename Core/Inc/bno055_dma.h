@@ -8,6 +8,7 @@ extern "C" {
 #include "geometry_msgs/msg/quaternion.h"
 #include "geometry_msgs/msg/vector3.h"
 #include "i2c.h"
+#include "mobi_interfaces/srv/get_imu_calib_data.h"
 #include "mobi_interfaces/srv/get_imu_calib_status.h"
 #include "sensor_msgs/msg/temperature.h"
 
@@ -208,7 +209,7 @@ typedef struct BNO055_s {
 
   /* DMA */
   uint8_t tx_buf[2];
-  volatile uint8_t rx_buf[8];
+  volatile uint8_t rx_buf[22];  // Note: 22 bytes for calib data. Biggest data for sensors is 8 bytes for quaternion.
   uint8_t reading_device;
 
   // Data
@@ -220,9 +221,11 @@ typedef struct BNO055_s {
   // double angular_velocity_covariance[9];
   // double linear_acceleration_covariance[9];
 
+  uint64_t test;
   sensor_msgs__msg__Temperature *temperature;
 
   mobi_interfaces__srv__GetImuCalibStatus_Response *calib_status;
+  mobi_interfaces__srv__GetImuCalibData_Response *calib_data;
 
 } BNO055_t;
 
@@ -244,6 +247,7 @@ void bno055_read_angular_velocity(BNO055_t *imu);
 void bno055_read_linear_acceleration(BNO055_t *imu);
 
 void bno055_read_calibration_state(BNO055_t *imu);
+void bno055_read_calibration_data(BNO055_t *imu);
 
 #ifdef __cplusplus
 }
