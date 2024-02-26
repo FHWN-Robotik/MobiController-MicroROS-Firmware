@@ -26,6 +26,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <micro_ros_utilities/string_utilities.h>
+#include <mobi_interfaces/srv/get_imu_calib_data.h>
+#include <mobi_interfaces/srv/get_imu_calib_status.h>
+#include <mobi_interfaces/srv/set_imu_calib_data.h>
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 #include <rclc/executor.h>
@@ -40,8 +44,6 @@
 #include <uxr/client/transport.h>
 
 #include "bno055_dma.h"
-#include "mobi_interfaces/srv/get_imu_calib_data.h"
-#include "mobi_interfaces/srv/get_imu_calib_status.h"
 #include "utils.h"
 
 /* USER CODE END Includes */
@@ -107,6 +109,7 @@ void timer_1s_callback(rcl_timer_t* timer, int64_t last_call_time);
 void timer_100ms_callback(rcl_timer_t* timer, int64_t last_call_time);
 void imu_get_calib_status_callback(const void* imu_get_calib_status_req, void* imu_get_calib_status_res);
 void imu_get_calib_data_callback(const void* imu_get_calib_data_req, void* imu_get_calib_data_res);
+void imu_set_calib_data_callback(const void* imu_set_calib_data_req, void* imu_set_calib_data_res);
 /* USER CODE END FunctionPrototypes */
 
 void start_ros_task(void* argument);
@@ -201,6 +204,10 @@ void start_ros_task(void* argument) {
   mobi_interfaces__srv__GetImuCalibData_Request imu_get_calib_data_req;
   mobi_interfaces__srv__GetImuCalibData_Response imu_get_calib_data_res;
 
+  rcl_service_t imu_set_calib_data_srv = rcl_get_zero_initialized_service();
+  mobi_interfaces__srv__SetImuCalibData_Request imu_set_calib_data_req;
+  mobi_interfaces__srv__SetImuCalibData_Response imu_set_calib_data_res;
+
   rclc_support_t support;
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
   rcl_allocator_t allocator;
@@ -233,6 +240,7 @@ void start_ros_task(void* argument) {
   // Initialize Services
   RCCHECK(rclc_service_init_default(&imu_get_calib_status_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibStatus), "/imu_get_calib_status"));
   RCCHECK(rclc_service_init_default(&imu_get_calib_data_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibData), "/imu_get_calib_data"));
+  RCCHECK(rclc_service_init_default(&imu_set_calib_data_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetImuCalibData), "/imu_set_calib_data"));
 
   // Timers
   rcl_timer_t timer_1s;
@@ -243,11 +251,12 @@ void start_ros_task(void* argument) {
 
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 4, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 5, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_100ms));
   RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_status_srv, &imu_get_calib_status_req, &imu_get_calib_status_res, imu_get_calib_status_callback));
   RCCHECK(rclc_executor_add_service(&executor, &imu_get_calib_data_srv, &imu_get_calib_data_req, &imu_get_calib_data_res, imu_get_calib_data_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &imu_set_calib_data_srv, &imu_set_calib_data_req, &imu_set_calib_data_res, imu_set_calib_data_callback));
 
   // Optional prepare for avoiding allocations during spin
   rclc_executor_prepare(&executor);
@@ -340,6 +349,20 @@ void imu_get_calib_data_callback(const void* imu_get_calib_data_req, void* imu_g
   }
 
   mobi_interfaces__srv__GetImuCalibData_Response__copy(imu.calib_data, res);
+}
+
+void imu_set_calib_data_callback(const void* imu_set_calib_data_req, void* imu_set_calib_data_res) {
+  // Cast messages to expected types
+  mobi_interfaces__srv__SetImuCalibData_Request* req = (mobi_interfaces__srv__SetImuCalibData_Request*)imu_set_calib_data_req;
+  mobi_interfaces__srv__SetImuCalibData_Response* res = (mobi_interfaces__srv__SetImuCalibData_Response*)imu_set_calib_data_res;
+
+  // Handle request message and set the response message values
+  printf("Client set IMU calibration data.\n");
+
+  bno055_set_calibration_data(&imu, req);
+
+  res->success = true;
+  res->message = micro_ros_string_utilities_init("Set IMU calibration data successfully.\n");
 }
 
 /* USER CODE END Application */

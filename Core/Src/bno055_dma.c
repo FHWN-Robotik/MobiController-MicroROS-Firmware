@@ -268,3 +268,41 @@ void bno055_read_calibration_data(BNO055_t *imu) {
 
   // Setting op mode back to NDOF after receiving the data.
 }
+
+void bno055_set_calibration_data(BNO055_t *imu, mobi_interfaces__srv__SetImuCalibData_Request *calib_data) {
+  uint8_t buffer[22];
+  bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_CONFIG);
+  bno055_set_page(imu, 0);
+
+  // Assumes litle endian processor
+  buffer[0] = (uint8_t)(calib_data->offset_accelerometer_x & 0xFF);
+  buffer[1] = (uint8_t)((calib_data->offset_accelerometer_x >> 8) & 0xFF);
+  buffer[2] = (uint8_t)(calib_data->offset_accelerometer_y & 0xFF);
+  buffer[3] = (uint8_t)((calib_data->offset_accelerometer_y >> 8) & 0xFF);
+  buffer[4] = (uint8_t)(calib_data->offset_accelerometer_z & 0xFF);
+  buffer[5] = (uint8_t)((calib_data->offset_accelerometer_z >> 8) & 0xFF);
+  buffer[6] = (uint8_t)(calib_data->offset_magnetometer_x & 0xFF);
+  buffer[7] = (uint8_t)((calib_data->offset_magnetometer_x >> 8) & 0xFF);
+  buffer[8] = (uint8_t)(calib_data->offset_magnetometer_y & 0xFF);
+  buffer[9] = (uint8_t)((calib_data->offset_magnetometer_y >> 8) & 0xFF);
+  buffer[10] = (uint8_t)(calib_data->offset_magnetometer_z & 0xFF);
+  buffer[11] = (uint8_t)((calib_data->offset_magnetometer_z >> 8) & 0xFF);
+  buffer[12] = (uint8_t)(calib_data->offset_gyroscope_x & 0xFF);
+  buffer[13] = (uint8_t)((calib_data->offset_gyroscope_x >> 8) & 0xFF);
+  buffer[14] = (uint8_t)(calib_data->offset_gyroscope_y & 0xFF);
+  buffer[15] = (uint8_t)((calib_data->offset_gyroscope_y >> 8) & 0xFF);
+  buffer[16] = (uint8_t)(calib_data->offset_gyroscope_z & 0xFF);
+  buffer[17] = (uint8_t)((calib_data->offset_gyroscope_z >> 8) & 0xFF);
+  buffer[18] = (uint8_t)(calib_data->radius_accelerometer & 0xFF);
+  buffer[19] = (uint8_t)((calib_data->radius_accelerometer >> 8) & 0xFF);
+  buffer[20] = (uint8_t)(calib_data->radius_magnetometer & 0xFF);
+  buffer[21] = (uint8_t)((calib_data->radius_magnetometer >> 8) & 0xFF);
+
+  for (uint8_t i = 0; i < 22; i++) {
+    bno055_write_DMA(imu, BNO055_ACC_OFFSET_X_LSB + i, buffer[i]);
+    while (!imu->reading_device == BNO055_DEVICE_NONE) {
+    }
+  }
+
+  bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_NDOF);
+}

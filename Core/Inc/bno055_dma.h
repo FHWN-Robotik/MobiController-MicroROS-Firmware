@@ -10,6 +10,7 @@ extern "C" {
 #include "i2c.h"
 #include "mobi_interfaces/srv/get_imu_calib_data.h"
 #include "mobi_interfaces/srv/get_imu_calib_status.h"
+#include "mobi_interfaces/srv/set_imu_calib_data.h"
 #include "sensor_msgs/msg/temperature.h"
 
 #define START_BYTE 0xAA
@@ -248,6 +249,7 @@ void bno055_read_linear_acceleration(BNO055_t *imu);
 
 void bno055_read_calibration_state(BNO055_t *imu);
 void bno055_read_calibration_data(BNO055_t *imu);
+void bno055_set_calibration_data(BNO055_t *imu, mobi_interfaces__srv__SetImuCalibData_Request *calib_data);
 
 #ifdef __cplusplus
 }
