@@ -30,6 +30,7 @@
 /* USER CODE BEGIN Includes */
 #include "bno055_dma.h"
 #include "canlib.h"
+#include "encoder.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,6 +53,11 @@
 /* USER CODE BEGIN PV */
 BNO055_t imu;
 canlib_t can;
+
+encoder_t encoder_1;
+encoder_t encoder_2;
+encoder_t encoder_3;
+encoder_t encoder_4;
 
 /* USER CODE END PV */
 
@@ -104,6 +110,13 @@ int main(void) {
 
   printf("Starting CAN...\n");
   canlib_init(&can, &hcan1);
+  canlib_send_stop(&can); // Stop motors!
+
+  printf("Init encoders...\n");
+  encoder_init(&encoder_1, ENCODER_1_A_GPIO_Port, ENCODER_1_A_Pin, ENCODER_1_B_GPIO_Port, ENCODER_1_B_Pin);
+  encoder_init(&encoder_2, ENCODER_2_A_GPIO_Port, ENCODER_2_A_Pin, ENCODER_2_B_GPIO_Port, ENCODER_2_B_Pin);
+  encoder_init(&encoder_3, ENCODER_3_A_GPIO_Port, ENCODER_3_A_Pin, ENCODER_3_B_GPIO_Port, ENCODER_3_B_Pin);
+  encoder_init(&encoder_4, ENCODER_4_A_GPIO_Port, ENCODER_4_A_Pin, ENCODER_4_B_GPIO_Port, ENCODER_4_B_Pin);
 
   printf("Starting FreeRTOS...\n");
   /* USER CODE END 2 */

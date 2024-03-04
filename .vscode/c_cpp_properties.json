@@ -54,6 +54,7 @@
         "micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_msgs/msg/detail",
         "micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_utilities",
         "micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/msg",
+        "micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/msg/detail",
         "micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/srv",
         "micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/srv/detail",
         "micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/nav_msgs/msg",

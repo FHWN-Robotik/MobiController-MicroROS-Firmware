@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bno055_dma.h"
+#include "encoder.h"
 
 /* USER CODE END Includes */
 
@@ -39,6 +40,11 @@ extern "C" {
 /* USER CODE BEGIN ET */
 extern struct BNO055_s imu;
 extern struct canlib_s can;
+
+extern struct encoder_s encoder_1;
+extern struct encoder_s encoder_2;
+extern struct encoder_s encoder_3;
+extern struct encoder_s encoder_4;
 
 /* USER CODE END ET */
 
@@ -62,6 +68,7 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
+#define B1_EXTI_IRQn EXTI15_10_IRQn
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOH
 #define USART_TX_Pin GPIO_PIN_2
@@ -76,12 +83,32 @@ void Error_Handler(void);
 #define SMPS_PG_GPIO_Port GPIOA
 #define SMPS_SW_Pin GPIO_PIN_7
 #define SMPS_SW_GPIO_Port GPIOA
+#define ENCODER_2_A_Pin GPIO_PIN_1
+#define ENCODER_2_A_GPIO_Port GPIOB
+#define ENCODER_2_A_EXTI_IRQn EXTI1_IRQn
 #define LD4_Pin GPIO_PIN_13
 #define LD4_GPIO_Port GPIOB
+#define ENCODER_3_A_Pin GPIO_PIN_15
+#define ENCODER_3_A_GPIO_Port GPIOB
+#define ENCODER_3_A_EXTI_IRQn EXTI15_10_IRQn
+#define ENCODER_3_B_Pin GPIO_PIN_6
+#define ENCODER_3_B_GPIO_Port GPIOC
+#define ENCODER_1_A_Pin GPIO_PIN_7
+#define ENCODER_1_A_GPIO_Port GPIOC
+#define ENCODER_1_A_EXTI_IRQn EXTI9_5_IRQn
+#define ENCODER_4_B_Pin GPIO_PIN_8
+#define ENCODER_4_B_GPIO_Port GPIOC
+#define ENCODER_4_A_Pin GPIO_PIN_10
+#define ENCODER_4_A_GPIO_Port GPIOA
+#define ENCODER_4_A_EXTI_IRQn EXTI15_10_IRQn
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
+#define ENCODER_2_B_Pin GPIO_PIN_10
+#define ENCODER_2_B_GPIO_Port GPIOC
+#define ENCODER_1_B_Pin GPIO_PIN_11
+#define ENCODER_1_B_GPIO_Port GPIOC
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
 #define USER_BTN_Pin GPIO_PIN_8

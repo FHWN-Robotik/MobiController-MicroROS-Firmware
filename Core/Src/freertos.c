@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include <geometry_msgs/msg/twist.h>
 #include <micro_ros_utilities/string_utilities.h>
+#include <mobi_interfaces/msg/encoders_stamped.h>
 #include <mobi_interfaces/srv/get_imu_calib_data.h>
 #include <mobi_interfaces/srv/get_imu_calib_status.h>
 #include <mobi_interfaces/srv/set_imu_calib_data.h>
@@ -79,6 +80,15 @@ typedef StaticTask_t osStaticThreadDef_t;
 // Publishers
 rcl_publisher_t temp_pup;
 rcl_publisher_t imu_pup;
+rcl_publisher_t encoders_pup;
+
+// Publisher msgs
+mobi_interfaces__msg__EncodersStamped encoders_msg;
+sensor_msgs__msg__Imu imu_msg = {
+    .orientation_covariance = {0.0159, 0, 0, 0, 0.0159, 0, 0, 0, 0.0159},
+    .angular_velocity_covariance = {0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04},
+    .linear_acceleration_covariance = {0.017, 0, 0, 0, 0.017, 0, 0, 0, 0.017},
+};
 
 // Subscribers
 rcl_subscription_t cmd_vel_sub;
@@ -196,7 +206,7 @@ void start_ros_task(void *argument) {
   rcl_publisher_t publisher_button;
   std_msgs__msg__Bool msg_button;
 
-  // Service server object
+  // Services
   rcl_service_t imu_get_calib_status_srv = rcl_get_zero_initialized_service();
   mobi_interfaces__srv__GetImuCalibStatus_Request imu_get_calib_status_req;
   mobi_interfaces__srv__GetImuCalibStatus_Response imu_get_calib_status_res;
@@ -209,6 +219,7 @@ void start_ros_task(void *argument) {
   mobi_interfaces__srv__SetImuCalibData_Request imu_set_calib_data_req;
   mobi_interfaces__srv__SetImuCalibData_Response imu_set_calib_data_res;
 
+  // RCLC Support
   rclc_support_t support;
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
   rcl_allocator_t allocator;
@@ -233,11 +244,11 @@ void start_ros_task(void *argument) {
   // create publisher
   RCCHECK(rclc_publisher_init_default(&publisher_button, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
                                       "/button"));
-
   RCCHECK(rclc_publisher_init_default(&temp_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature),
                                       "/temperature"));
-
   RCCHECK(rclc_publisher_init_default(&imu_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu"));
+  RCCHECK(rclc_publisher_init_default(&encoders_pup, &node,
+                                      ROSIDL_GET_MSG_TYPE_SUPPORT(mobi_interfaces, msg, EncodersStamped), "/encoders"));
 
   // create subsribers
   RCCHECK(rclc_subscription_init_default(&cmd_vel_sub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
@@ -320,26 +331,29 @@ void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
   (void)last_call_time;
 
   if (timer != NULL) {
+
+    // Publish IMU
     bno055_read_quaternion(&imu);
     bno055_read_angular_velocity(&imu);
     bno055_read_linear_acceleration(&imu);
 
-    sensor_msgs__msg__Imu imu_msg = {
-        .header =
-            {
-                .frame_id = "imu",
-            },
-        .orientation_covariance = {0.0159, 0, 0, 0, 0.0159, 0, 0, 0, 0.0159},
-        .angular_velocity_covariance = {0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04},
-        .linear_acceleration_covariance = {0.017, 0, 0, 0, 0.017, 0, 0, 0, 0.017},
-        .orientation = *imu.orientation,
-        .angular_velocity = *imu.angular_velocity,
-        .linear_acceleration = *imu.linear_acceleration,
-    };
+    imu_msg.header.frame_id = micro_ros_string_utilities_init("imu");
+    imu_msg.orientation = *imu.orientation;
+    imu_msg.angular_velocity = *imu.angular_velocity;
+    imu_msg.linear_acceleration = *imu.linear_acceleration;
 
     stamp_header(&imu_msg.header.stamp);
-
     RCCHECK(rcl_publish(&imu_pup, &imu_msg, NULL));
+
+    // Publish encoders
+    encoders_msg.header.frame_id = micro_ros_string_utilities_init("encoders");
+    encoders_msg.encoders.front_left = encoder_1.counter;
+    encoders_msg.encoders.front_right = encoder_2.counter;
+    encoders_msg.encoders.rear_left = encoder_3.counter;
+    encoders_msg.encoders.rear_right = encoder_4.counter;
+
+    stamp_header(&encoders_msg.header.stamp);
+    RCCHECK(rcl_publish(&encoders_pup, &encoders_msg, NULL));
   }
 }
 

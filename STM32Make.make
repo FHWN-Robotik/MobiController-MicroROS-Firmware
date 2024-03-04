@@ -40,9 +40,11 @@ Core/Src/bno055_dma.c \
 Core/Src/can.c \
 Core/Src/canlib.c \
 Core/Src/dma.c \
+Core/Src/encoder.c \
 Core/Src/freertos.c \
 Core/Src/gpio.c \
 Core/Src/i2c.c \
+Core/Src/interrupts.c \
 Core/Src/main.c \
 Core/Src/stm32l4xx_hal_msp.c \
 Core/Src/stm32l4xx_hal_timebase_tim.c \
@@ -219,6 +221,7 @@ C_INCLUDES =  \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_msgs/msg/detail \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/micro_ros_utilities \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/msg \
+-Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/msg/detail \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/srv \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/mobi_interfaces/srv/detail \
 -Imicro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/nav_msgs/msg \

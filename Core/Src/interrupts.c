@@ -7,6 +7,7 @@
  * ----------------------------------------------------------------------------------------------------------------------------------------------
  */
 
+#include "encoder.h"
 #include "i2c.h"
 #include "main.h"
 #include "stm32l4xx.h"
@@ -25,4 +26,22 @@ void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c) {
   }
 
   bno055_read_DMA_complete(&imu);
+}
+
+/*
+ * GPIO external interrupt
+ */
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+
+  // Handle encoder ext interrupts
+  if (GPIO_Pin == encoder_1.gpio_a_pin) {
+    encoder_handle_interrupt(&encoder_1);
+  } else if (GPIO_Pin == encoder_2.gpio_a_pin) {
+    encoder_handle_interrupt(&encoder_2);
+  } else if (GPIO_Pin == encoder_3.gpio_a_pin) {
+    encoder_handle_interrupt(&encoder_3);
+  } else if (GPIO_Pin == encoder_4.gpio_a_pin) {
+    encoder_handle_interrupt(&encoder_4);
+  }
 }
