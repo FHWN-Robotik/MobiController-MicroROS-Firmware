@@ -418,8 +418,12 @@ void cmd_vel_callback(const void *msgin) {
   int16_t speed = 500;
   int16_t rot_speed = 2000;
 
-  int16_t vx = speed * msg->linear.x;
-  int16_t vy = speed * msg->linear.y;
+  // Flip x and y axis to comply with ROS spec.
+  // https://www.ros.org/reps/rep-0103.html#id21
+  // x forward, y left, z up
+  // but for the motorcontroler the y axis is forward
+  int16_t vx = speed * -msg->linear.y;
+  int16_t vy = speed * msg->linear.x;
   int16_t vphi = rot_speed * msg->angular.z;
 
   HAL_StatusTypeDef status = canlib_drive(&can, vx, vy, vphi);
