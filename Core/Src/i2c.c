@@ -178,15 +178,5 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef *i2cHandle) {
 }
 
 /* USER CODE BEGIN 1 */
-void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c) {
-  // TX Done .. Do Something!
-}
 
-void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-  if (hi2c->Instance != I2C1) {
-    return;
-  }
-
-  bno055_read_DMA_complete(&imu);
-}
 /* USER CODE END 1 */
