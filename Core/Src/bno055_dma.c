@@ -133,7 +133,7 @@ void bno055_write_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t data) {
   }
 
   HAL_StatusTypeDef status =
-      HAL_I2C_Master_Transmit_DMA(imu->i2c_handle, imu->device_address << 1, imu->tx_buf, sizeof(imu->tx_buf));
+    HAL_I2C_Master_Transmit_DMA(imu->i2c_handle, imu->device_address << 1, imu->tx_buf, sizeof(imu->tx_buf));
   check_status(imu, status);
 }
 
@@ -147,7 +147,7 @@ void bno055_read_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t len) {
   }
 
   HAL_StatusTypeDef status =
-      HAL_I2C_Master_Receive_DMA(imu->i2c_handle, imu->device_address << 1, (uint8_t *)imu->rx_buf, len);
+    HAL_I2C_Master_Receive_DMA(imu->i2c_handle, imu->device_address << 1, (uint8_t *)imu->rx_buf, len);
   check_status(imu, status);
 }
 

@@ -84,7 +84,7 @@ HAL_StatusTypeDef canlib_drive(canlib_t *can, int16_t vx, int16_t vy, int16_t vp
   uint8_t phi_high = (val_phi >> 8) & 0xFF; // Extract the high byte of val_phi
 
   uint8_t data[8] = {
-      x_low, x_high, y_low, y_high, phi_low, phi_high, 0x00, 0x00,
+    x_low, x_high, y_low, y_high, phi_low, phi_high, 0x00, 0x00,
   };
   return canlib_send_extended(can, CANLIB_MOVE_LATERALLY, data);
 }

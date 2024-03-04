@@ -85,9 +85,9 @@ rcl_publisher_t encoders_pup;
 // Publisher msgs
 mobi_interfaces__msg__EncodersStamped encoders_msg;
 sensor_msgs__msg__Imu imu_msg = {
-    .orientation_covariance = {0.0159, 0, 0, 0, 0.0159, 0, 0, 0, 0.0159},
-    .angular_velocity_covariance = {0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04},
-    .linear_acceleration_covariance = {0.017, 0, 0, 0, 0.017, 0, 0, 0, 0.017},
+  .orientation_covariance = {0.0159, 0, 0, 0, 0.0159, 0, 0, 0, 0.0159},
+  .angular_velocity_covariance = {0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04},
+  .linear_acceleration_covariance = {0.017, 0, 0, 0, 0.017, 0, 0, 0, 0.017},
 };
 
 // Subscribers
@@ -100,12 +100,12 @@ osThreadId_t ros_taskHandle;
 uint32_t ros_task_buffer[3000];
 osStaticThreadDef_t ros_task_control_block;
 const osThreadAttr_t ros_task_attributes = {
-    .name = "ros_task",
-    .cb_mem = &ros_task_control_block,
-    .cb_size = sizeof(ros_task_control_block),
-    .stack_mem = &ros_task_buffer[0],
-    .stack_size = sizeof(ros_task_buffer),
-    .priority = (osPriority_t)osPriorityNormal,
+  .name = "ros_task",
+  .cb_mem = &ros_task_control_block,
+  .cb_size = sizeof(ros_task_control_block),
+  .stack_mem = &ros_task_buffer[0],
+  .stack_size = sizeof(ros_task_buffer),
+  .priority = (osPriority_t)osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -242,8 +242,8 @@ void start_ros_task(void *argument) {
   RCCHECK(rclc_node_init_default(&node, "stm32_node", "", &support));
 
   // create publisher
-  RCCHECK(rclc_publisher_init_default(&publisher_button, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-                                      "/button"));
+  RCCHECK(
+    rclc_publisher_init_default(&publisher_button, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool), "/button"));
   RCCHECK(rclc_publisher_init_default(&temp_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature),
                                       "/temperature"));
   RCCHECK(rclc_publisher_init_default(&imu_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu"));
@@ -363,7 +363,7 @@ void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *i
   // mobi_interfaces__srv__GetImuCalibStatus_Request *req =
   //     (mobi_interfaces__srv__GetImuCalibStatus_Request *)imu_get_calib_status_req;
   mobi_interfaces__srv__GetImuCalibStatus_Response *res =
-      (mobi_interfaces__srv__GetImuCalibStatus_Response *)imu_get_calib_status_res;
+    (mobi_interfaces__srv__GetImuCalibStatus_Response *)imu_get_calib_status_res;
 
   // Handle request message and set the response message values
   printf("Client requested IMU calibration status.\n");
@@ -380,7 +380,7 @@ void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_g
   // mobi_interfaces__srv__GetImuCalibData_Request *req =
   //     (mobi_interfaces__srv__GetImuCalibData_Request *)imu_get_calib_data_req;
   mobi_interfaces__srv__GetImuCalibData_Response *res =
-      (mobi_interfaces__srv__GetImuCalibData_Response *)imu_get_calib_data_res;
+    (mobi_interfaces__srv__GetImuCalibData_Response *)imu_get_calib_data_res;
 
   // Handle request message and set the response message values
   printf("Client requested IMU calibration data.\n");
@@ -395,9 +395,9 @@ void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_g
 void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_set_calib_data_res) {
   // Cast messages to expected types
   mobi_interfaces__srv__SetImuCalibData_Request *req =
-      (mobi_interfaces__srv__SetImuCalibData_Request *)imu_set_calib_data_req;
+    (mobi_interfaces__srv__SetImuCalibData_Request *)imu_set_calib_data_req;
   mobi_interfaces__srv__SetImuCalibData_Response *res =
-      (mobi_interfaces__srv__SetImuCalibData_Response *)imu_set_calib_data_res;
+    (mobi_interfaces__srv__SetImuCalibData_Response *)imu_set_calib_data_res;
 
   // Handle request message and set the response message values
   printf("Client set IMU calibration data.\n");
