@@ -1,5 +1,5 @@
-#ifndef CANLIB_H_
-#define CANLIB_H_
+#ifndef __CANLIB_H_
+#define __CANLIB_H_
 
 #include "can.h"
 #include "stm32l4xx.h"
@@ -18,4 +18,4 @@ HAL_StatusTypeDef canlib_send_extended(canlib_t *can, uint32_t ext_id, const uin
 HAL_StatusTypeDef canlib_send_stop(canlib_t *can);
 HAL_StatusTypeDef canlib_drive(canlib_t *can, int16_t vx, int16_t vy, int16_t vphi);
 
-#endif
+#endif /* __CANLIB_H_ */

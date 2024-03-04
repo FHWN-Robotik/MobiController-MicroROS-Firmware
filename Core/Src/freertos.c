@@ -346,8 +346,8 @@ void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
 // Service callbacks
 void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *imu_get_calib_status_res) {
   // Cast messages to expected types
-  mobi_interfaces__srv__GetImuCalibStatus_Request *req =
-      (mobi_interfaces__srv__GetImuCalibStatus_Request *)imu_get_calib_status_req;
+  // mobi_interfaces__srv__GetImuCalibStatus_Request *req =
+  //     (mobi_interfaces__srv__GetImuCalibStatus_Request *)imu_get_calib_status_req;
   mobi_interfaces__srv__GetImuCalibStatus_Response *res =
       (mobi_interfaces__srv__GetImuCalibStatus_Response *)imu_get_calib_status_res;
 
@@ -363,8 +363,8 @@ void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *i
 
 void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_get_calib_data_res) {
   // Cast messages to expected types
-  mobi_interfaces__srv__GetImuCalibData_Request *req =
-      (mobi_interfaces__srv__GetImuCalibData_Request *)imu_get_calib_data_req;
+  // mobi_interfaces__srv__GetImuCalibData_Request *req =
+  //     (mobi_interfaces__srv__GetImuCalibData_Request *)imu_get_calib_data_req;
   mobi_interfaces__srv__GetImuCalibData_Response *res =
       (mobi_interfaces__srv__GetImuCalibData_Response *)imu_get_calib_data_res;
 
