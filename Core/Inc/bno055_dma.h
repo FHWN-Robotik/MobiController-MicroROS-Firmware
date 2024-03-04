@@ -1,3 +1,13 @@
+/*
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ * File: bno055_dma.h
+ * Created Date: Monday, February 26th 2024, 2:37:05 pm
+ * Author: Florian Hye
+ * Description: This file defines the driver for the BNO055 IMU using I2C via DMA.
+ *              The basis of this driver is: https://github.com/ivyknob/bno055_stm32
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 #ifndef __BNO055_DMA_H__
 #define __BNO055_DMA_H__
 

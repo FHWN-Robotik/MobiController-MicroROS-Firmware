@@ -1,3 +1,12 @@
+/*
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ * File: bno055_dma.c
+ * Created Date: Monday, February 26th 2024, 2:37:05 pm
+ * Author: Florian Hye
+ * Description: This file implements helpers for the BNO055 IMU using I2C via DMA.
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 #include "bno055_dma.h"
 
 #include <micro_ros_utilities/string_utilities.h>

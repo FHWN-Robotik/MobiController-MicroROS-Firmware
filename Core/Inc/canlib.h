@@ -1,3 +1,13 @@
+/*
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ * File: canlib.h
+ * Created Date: Monday, February 26th 2024, 2:51:45 pm
+ * Author: Florian Hye
+ * Description: This file defines the canlib functions.
+ * These are used to more easily controll the motor controler via CAN.
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 #ifndef __CANLIB_H_
 #define __CANLIB_H_
 

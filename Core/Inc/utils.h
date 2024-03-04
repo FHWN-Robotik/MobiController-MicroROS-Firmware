@@ -1,3 +1,13 @@
+/*
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ * File: utils.h
+ * Created Date: Monday, February 26th 2024, 2:37:05 pm
+ * Author: Florian Hye
+ * Description: This file defines some utils functions.
+ *               These are used throughout the firmware.
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
