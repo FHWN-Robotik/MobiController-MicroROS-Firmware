@@ -41,10 +41,12 @@
 #include <sensor_msgs/msg/imu.h>
 #include <sensor_msgs/msg/temperature.h>
 #include <std_msgs/msg/bool.h>
+#include <std_srvs/srv/trigger.h>
 #include <stdbool.h>
 #include <uxr/client/transport.h>
 
 #include "bno055_dma.h"
+#include "bootloader.h"
 #include "canlib.h"
 #include "utils.h"
 
@@ -92,6 +94,8 @@ sensor_msgs__msg__Imu imu_msg = {
 
 // Subscribers
 rcl_subscription_t cmd_vel_sub;
+
+// Subscriber msgs
 geometry_msgs__msg__Twist cmd_vel_msg;
 
 /* USER CODE END Variables */
@@ -125,6 +129,7 @@ void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time);
 void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *imu_get_calib_status_res);
 void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_get_calib_data_res);
 void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_set_calib_data_res);
+void boot_bootlaoder_callback(const void *boot_bootlaoder_req, void *boot_bootlaoder_res);
 void cmd_vel_callback(const void *msgin);
 /* USER CODE END FunctionPrototypes */
 
@@ -219,6 +224,10 @@ void start_ros_task(void *argument) {
   mobi_interfaces__srv__SetImuCalibData_Request imu_set_calib_data_req;
   mobi_interfaces__srv__SetImuCalibData_Response imu_set_calib_data_res;
 
+  rcl_service_t boot_bootloader_srv = rcl_get_zero_initialized_service();
+  std_srvs__srv__Trigger_Request boot_bootloader_req;
+  std_srvs__srv__Trigger_Response boot_bootloader_res;
+
   // RCLC Support
   rclc_support_t support;
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
@@ -264,6 +273,8 @@ void start_ros_task(void *argument) {
   RCCHECK(rclc_service_init_default(&imu_set_calib_data_srv, &node,
                                     ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetImuCalibData),
                                     "/imu_set_calib_data"));
+  RCCHECK(rclc_service_init_default(&boot_bootloader_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, Trigger),
+                                    "/boot_bootloader"));
 
   // Timers
   rcl_timer_t timer_1s;
@@ -274,7 +285,7 @@ void start_ros_task(void *argument) {
 
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 6, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 7, &allocator));
 
   // Add Timers to executor
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
@@ -290,6 +301,8 @@ void start_ros_task(void *argument) {
                                     &imu_get_calib_data_res, imu_get_calib_data_callback));
   RCCHECK(rclc_executor_add_service(&executor, &imu_set_calib_data_srv, &imu_set_calib_data_req,
                                     &imu_set_calib_data_res, imu_set_calib_data_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &boot_bootloader_srv, &boot_bootloader_req, &boot_bootloader_res,
+                                    boot_bootlaoder_callback));
 
   // Optional prepare for avoiding allocations during spin
   RCCHECK(rclc_executor_prepare(&executor));
@@ -306,6 +319,11 @@ void start_ros_task(void *argument) {
 
       RCCHECK(rcl_publish(&publisher_button, &msg_button, NULL));
     }
+
+    // Boot into bootloader if flag is set.
+    // Note: The flag gets set by the service /boot_bootloader
+    if (should_jump_to_bootloader)
+      jump_to_bootloader();
 
     rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 
@@ -406,6 +424,16 @@ void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_s
 
   res->success = true;
   res->message = micro_ros_string_utilities_init("Set IMU calibration data successfully.\n");
+}
+
+void boot_bootlaoder_callback(const void *boot_bootlaoder_req, void *boot_bootlaoder_res) {
+  // Cast messages to expected types
+  // std_srvs__srv__Trigger_Request *req = (std_srvs__srv__Trigger_Request *)boot_bootlaoder_req;
+  std_srvs__srv__Trigger_Response *res = (std_srvs__srv__Trigger_Response *)boot_bootlaoder_res;
+
+  should_jump_to_bootloader = true;
+  res->message = micro_ros_string_utilities_init("Booting into bootloader!");
+  res->success = true;
 }
 
 void cmd_vel_callback(const void *msgin) {

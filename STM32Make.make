@@ -37,6 +37,7 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 Core/Src/bno055_dma.c \
+Core/Src/bootloader.c \
 Core/Src/can.c \
 Core/Src/canlib.c \
 Core/Src/dma.c \
