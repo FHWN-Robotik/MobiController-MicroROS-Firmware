@@ -26,7 +26,9 @@
     "time.h": "c",
     "types.h": "c",
     "stm32l4xx.h": "c",
-    "service_type_support_struct.h": "c"
+    "service_type_support_struct.h": "c",
+    "stm32l452xx.h": "c",
+    "dma.h": "c"
   },
   "cortex-debug.armToolchainPath": "/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/12.2.1-1.2.1/.content/bin",
   "cortex-debug.openocdPath": "/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-1.1/.content/bin/openocd"

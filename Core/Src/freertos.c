@@ -81,12 +81,14 @@ typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN Variables */
 
 // Publishers
+rcl_publisher_t publisher_button;
 rcl_publisher_t temp_pup;
 rcl_publisher_t imu_pup;
 rcl_publisher_t encoders_pup;
 rcl_publisher_t battery_state_pub;
 
 // Publisher msgs
+std_msgs__msg__Bool msg_button;
 mobi_interfaces__msg__EncodersStamped encoders_msg;
 sensor_msgs__msg__Imu imu_msg = {
   .orientation_covariance = {0.0159, 0, 0, 0, 0.0159, 0, 0, 0, 0.0159},
@@ -218,10 +220,6 @@ void start_ros_task(void *argument) {
 
   // micro-ROS app
 
-  // Publisher
-  rcl_publisher_t publisher_button;
-  std_msgs__msg__Bool msg_button;
-
   // Services
   rcl_service_t imu_get_calib_status_srv = rcl_get_zero_initialized_service();
   mobi_interfaces__srv__GetImuCalibStatus_Request imu_get_calib_status_req;
@@ -351,49 +349,49 @@ void start_ros_task(void *argument) {
 void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time) {
   (void)last_call_time;
 
-  if (timer != NULL) {
+  if (timer == NULL)
+    return;
 
-    // Temperature
-    bno055_read_temp(&imu);
-    stamp_header(&imu.temperature->header.stamp);
-    RCCHECK(rcl_publish(&temp_pup, &imu.temperature, NULL));
+  // Temperature
+  bno055_read_temp(&imu);
+  stamp_header(&imu.temperature->header.stamp);
+  RCCHECK(rcl_publish(&temp_pup, &imu.temperature, NULL));
 
-    // Battery voltage
-    pwr_manager_read_battery_voltage(&pwr_manager);
-    battery_state_msg.voltage = pwr_manager.battery_voltage;
-    stamp_header(&battery_state_msg.header.stamp);
-    RCCHECK(rcl_publish(&battery_state_pub, &battery_state_msg, NULL));
-  }
+  // Battery voltage
+  pwr_manager_read_battery_voltage(&pwr_manager);
+  battery_state_msg.voltage = pwr_manager.battery_voltage;
+  stamp_header(&battery_state_msg.header.stamp);
+  RCCHECK(rcl_publish(&battery_state_pub, &battery_state_msg, NULL));
 }
 
 void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
   (void)last_call_time;
 
-  if (timer != NULL) {
+  if (timer == NULL)
+    return;
 
-    // Publish IMU
-    bno055_read_quaternion(&imu);
-    bno055_read_angular_velocity(&imu);
-    bno055_read_linear_acceleration(&imu);
+  // Publish IMU
+  bno055_read_quaternion(&imu);
+  bno055_read_angular_velocity(&imu);
+  bno055_read_linear_acceleration(&imu);
 
-    imu_msg.header.frame_id = micro_ros_string_utilities_init("imu");
-    imu_msg.orientation = *imu.orientation;
-    imu_msg.angular_velocity = *imu.angular_velocity;
-    imu_msg.linear_acceleration = *imu.linear_acceleration;
+  imu_msg.header.frame_id = micro_ros_string_utilities_init("imu");
+  imu_msg.orientation = *imu.orientation;
+  imu_msg.angular_velocity = *imu.angular_velocity;
+  imu_msg.linear_acceleration = *imu.linear_acceleration;
 
-    stamp_header(&imu_msg.header.stamp);
-    RCCHECK(rcl_publish(&imu_pup, &imu_msg, NULL));
+  stamp_header(&imu_msg.header.stamp);
+  RCCHECK(rcl_publish(&imu_pup, &imu_msg, NULL));
 
-    // Publish encoders
-    encoders_msg.header.frame_id = micro_ros_string_utilities_init("encoders");
-    encoders_msg.encoders.front_left = encoder_1.counter;
-    encoders_msg.encoders.front_right = encoder_2.counter;
-    encoders_msg.encoders.rear_left = encoder_3.counter;
-    encoders_msg.encoders.rear_right = encoder_4.counter;
+  // Publish encoders
+  encoders_msg.header.frame_id = micro_ros_string_utilities_init("encoders");
+  encoders_msg.encoders.front_left = encoder_1.counter;
+  encoders_msg.encoders.front_right = encoder_2.counter;
+  encoders_msg.encoders.rear_left = encoder_3.counter;
+  encoders_msg.encoders.rear_right = encoder_4.counter;
 
-    stamp_header(&encoders_msg.header.stamp);
-    RCCHECK(rcl_publish(&encoders_pup, &encoders_msg, NULL));
-  }
+  stamp_header(&encoders_msg.header.stamp);
+  RCCHECK(rcl_publish(&encoders_pup, &encoders_msg, NULL));
 }
 
 // Service callbacks
