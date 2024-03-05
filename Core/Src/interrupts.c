@@ -45,3 +45,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     encoder_handle_interrupt(&encoder_4);
   }
 }
+
+/*
+ * ADC
+ */
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
+  // Conversion Complete & DMA Transfer Complete As Well
+  if (hadc != pwr_manager.adc)
+    return;
+
+  pwr_manager.battery_voltage =
+    __LL_ADC_CALC_DATA_TO_VOLTAGE(3300UL, pwr_manager.adc_res, LL_ADC_RESOLUTION_12B) * (14 / 3.3) * 0.001;
+}

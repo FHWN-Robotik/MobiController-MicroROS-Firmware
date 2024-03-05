@@ -38,6 +38,7 @@
 #include <rmw_microros/rmw_microros.h>
 #include <rmw_microxrcedds_c/config.h>
 #include <rosidl_runtime_c/service_type_support_struct.h>
+#include <sensor_msgs/msg/battery_state.h>
 #include <sensor_msgs/msg/imu.h>
 #include <sensor_msgs/msg/temperature.h>
 #include <std_msgs/msg/bool.h>
@@ -83,6 +84,7 @@ typedef StaticTask_t osStaticThreadDef_t;
 rcl_publisher_t temp_pup;
 rcl_publisher_t imu_pup;
 rcl_publisher_t encoders_pup;
+rcl_publisher_t battery_state_pub;
 
 // Publisher msgs
 mobi_interfaces__msg__EncodersStamped encoders_msg;
@@ -90,6 +92,15 @@ sensor_msgs__msg__Imu imu_msg = {
   .orientation_covariance = {0.0159, 0, 0, 0, 0.0159, 0, 0, 0, 0.0159},
   .angular_velocity_covariance = {0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04},
   .linear_acceleration_covariance = {0.017, 0, 0, 0, 0.017, 0, 0, 0, 0.017},
+};
+sensor_msgs__msg__BatteryState battery_state_msg = {
+  .header.frame_id = "battery",
+  .power_supply_status = 0,
+  .power_supply_technology = 2,
+  .power_supply_health = 0,
+  .design_capacity = 10.4,
+  .present = true,
+  .voltage = 0,
 };
 
 // Subscribers
@@ -258,6 +269,8 @@ void start_ros_task(void *argument) {
   RCCHECK(rclc_publisher_init_default(&imu_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu), "/imu"));
   RCCHECK(rclc_publisher_init_default(&encoders_pup, &node,
                                       ROSIDL_GET_MSG_TYPE_SUPPORT(mobi_interfaces, msg, EncodersStamped), "/encoders"));
+  RCCHECK(rclc_publisher_init_default(&battery_state_pub, &node,
+                                      ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, BatteryState), "/battery_state"));
 
   // create subsribers
   RCCHECK(rclc_subscription_init_default(&cmd_vel_sub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
@@ -339,9 +352,17 @@ void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time) {
   (void)last_call_time;
 
   if (timer != NULL) {
+
+    // Temperature
     bno055_read_temp(&imu);
     stamp_header(&imu.temperature->header.stamp);
     RCCHECK(rcl_publish(&temp_pup, &imu.temperature, NULL));
+
+    // Battery voltage
+    pwr_manager_read_battery_voltage(&pwr_manager);
+    battery_state_msg.voltage = pwr_manager.battery_voltage;
+    stamp_header(&battery_state_msg.header.stamp);
+    RCCHECK(rcl_publish(&battery_state_pub, &battery_state_msg, NULL));
   }
 }
 

@@ -33,6 +33,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include "bno055_dma.h"
 #include "encoder.h"
+#include "power_manager.h"
 
 /* USER CODE END Includes */
 
@@ -45,6 +46,8 @@ extern struct encoder_s encoder_1;
 extern struct encoder_s encoder_2;
 extern struct encoder_s encoder_3;
 extern struct encoder_s encoder_4;
+
+extern struct pwr_manager_s pwr_manager;
 
 /* USER CODE END ET */
 
@@ -83,6 +86,8 @@ void Error_Handler(void);
 #define SMPS_PG_GPIO_Port GPIOA
 #define SMPS_SW_Pin GPIO_PIN_7
 #define SMPS_SW_GPIO_Port GPIOA
+#define ADC_BAT_VOLT_Pin GPIO_PIN_0
+#define ADC_BAT_VOLT_GPIO_Port GPIOB
 #define ENCODER_2_A_Pin GPIO_PIN_1
 #define ENCODER_2_A_GPIO_Port GPIOB
 #define ENCODER_2_A_EXTI_IRQn EXTI1_IRQn

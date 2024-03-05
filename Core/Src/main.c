@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
 #include "can.h"
 #include "cmsis_os.h"
 #include "dma.h"
@@ -59,10 +60,15 @@ encoder_t encoder_2;
 encoder_t encoder_3;
 encoder_t encoder_4;
 
+pwr_manager_t pwr_manager = {
+  .battery_warning_triggerd = false,
+};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -94,6 +100,9 @@ int main(void) {
   /* Configure the system clock */
   SystemClock_Config();
 
+  /* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -104,6 +113,7 @@ int main(void) {
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_CAN1_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   printf("Initializing i2c devices...\n");
   bno055_init(&imu, &hi2c1, BNO055_I2C_ADDR_LO);
@@ -117,6 +127,9 @@ int main(void) {
   encoder_init(&encoder_2, ENCODER_2_A_GPIO_Port, ENCODER_2_A_Pin, ENCODER_2_B_GPIO_Port, ENCODER_2_B_Pin);
   encoder_init(&encoder_3, ENCODER_3_A_GPIO_Port, ENCODER_3_A_Pin, ENCODER_3_B_GPIO_Port, ENCODER_3_B_Pin);
   encoder_init(&encoder_4, ENCODER_4_A_GPIO_Port, ENCODER_4_A_Pin, ENCODER_4_B_GPIO_Port, ENCODER_4_B_Pin);
+
+  printf("Init power manager...\n");
+  pwr_manager_init(&pwr_manager, &hadc1);
 
   printf("Starting FreeRTOS...\n");
   /* USER CODE END 2 */
@@ -194,6 +207,30 @@ void SystemClock_Config(void) {
   /** Enable MSI Auto calibration
    */
   HAL_RCCEx_EnableMSIPLLMode();
+}
+
+/**
+ * @brief Peripherals Common Clock Configuration
+ * @retval None
+ */
+void PeriphCommonClock_Config(void) {
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+
+  /** Initializes the peripherals clock
+   */
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB | RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCCLKSOURCE_PLLSAI1;
+  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLLSAI1;
+  PeriphClkInit.PLLSAI1.PLLSAI1Source = RCC_PLLSOURCE_MSI;
+  PeriphClkInit.PLLSAI1.PLLSAI1M = 1;
+  PeriphClkInit.PLLSAI1.PLLSAI1N = 24;
+  PeriphClkInit.PLLSAI1.PLLSAI1P = RCC_PLLP_DIV7;
+  PeriphClkInit.PLLSAI1.PLLSAI1Q = RCC_PLLQ_DIV2;
+  PeriphClkInit.PLLSAI1.PLLSAI1R = RCC_PLLR_DIV2;
+  PeriphClkInit.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_48M2CLK | RCC_PLLSAI1_ADC1CLK;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */

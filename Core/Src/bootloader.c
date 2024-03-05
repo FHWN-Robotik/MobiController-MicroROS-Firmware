@@ -9,7 +9,7 @@
 
 #include "bootloader.h"
 
-// #include "adc.h"
+#include "adc.h"
 #include "can.h"
 #include "dma.h"
 #include "gpio.h"
@@ -31,7 +31,7 @@ void jump_to_bootloader(void) {
   USB->CNTR = 0x0003;
 
   // De-init all peripherals
-  // HAL_ADC_DeInit(&hadc1);
+  HAL_ADC_DeInit(&hadc1);
   // HAL_TIM_PWM_DeInit(&htim1);
   // HAL_TIM_Base_DeInit(&htim1);
   // HAL_TIM_Base_DeInit(&htim6);
