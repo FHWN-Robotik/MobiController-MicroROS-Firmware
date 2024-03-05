@@ -21,7 +21,7 @@ void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c) {
 }
 
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-  if (hi2c->Instance != I2C1) {
+  if (hi2c != imu.i2c_handle) {
     return;
   }
 
