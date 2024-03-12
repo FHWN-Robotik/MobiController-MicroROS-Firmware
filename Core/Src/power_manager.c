@@ -19,6 +19,10 @@ void pwr_manager_init(pwr_manager_t *pwr_manager, ADC_HandleTypeDef *hadc) {
   pwr_manager->battery_warning_triggerd = false;
 
   HAL_ADCEx_Calibration_Start(hadc, ADC_SINGLE_ENDED);
+
+  // Init with pozyx and led turned off.
+  pwr_manager_set_power_pozyx(false);
+  pwr_manager_set_power_led(false);
 }
 
 void pwr_manager_read_battery_voltage(pwr_manager_t *pwr_manager) {
