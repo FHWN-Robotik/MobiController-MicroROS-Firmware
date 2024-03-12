@@ -32,6 +32,7 @@
 #include <mobi_interfaces/srv/get_imu_calib_data.h>
 #include <mobi_interfaces/srv/get_imu_calib_status.h>
 #include <mobi_interfaces/srv/set_imu_calib_data.h>
+#include <mobi_interfaces/srv/set_power.h>
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 #include <rclc/executor.h>
@@ -151,6 +152,7 @@ void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *i
 void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_get_calib_data_res);
 void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_set_calib_data_res);
 void boot_bootlaoder_callback(const void *boot_bootlaoder_req, void *boot_bootlaoder_res);
+void pozyx_set_pwr_callback(const void *pozyx_set_pwr_req, void *pozyx_set_pwr_res);
 void cmd_vel_callback(const void *msgin);
 /* USER CODE END FunctionPrototypes */
 
@@ -245,6 +247,10 @@ void start_ros_task(void *argument) {
   std_srvs__srv__Trigger_Request boot_bootloader_req;
   std_srvs__srv__Trigger_Response boot_bootloader_res;
 
+  rcl_service_t pozyx_set_pwr_srv = rcl_get_zero_initialized_service();
+  mobi_interfaces__srv__SetPower_Request pozyx_set_pwr_req;
+  mobi_interfaces__srv__SetPower_Response pozyx_set_pwr_res;
+
   // RCLC Support
   rclc_support_t support;
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
@@ -294,6 +300,8 @@ void start_ros_task(void *argument) {
                                     "/imu_set_calib_data"));
   RCCHECK(rclc_service_init_default(&boot_bootloader_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, Trigger),
                                     "/boot_bootloader"));
+  RCCHECK(rclc_service_init_default(&pozyx_set_pwr_srv, &node,
+                                    ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetPower), "/pozyx_set_power"));
 
   // Timers
   rcl_timer_t timer_1s;
@@ -304,7 +312,7 @@ void start_ros_task(void *argument) {
 
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 7, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 8, &allocator));
 
   // Add Timers to executor
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
@@ -322,6 +330,8 @@ void start_ros_task(void *argument) {
                                     &imu_set_calib_data_res, imu_set_calib_data_callback));
   RCCHECK(rclc_executor_add_service(&executor, &boot_bootloader_srv, &boot_bootloader_req, &boot_bootloader_res,
                                     boot_bootlaoder_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &pozyx_set_pwr_srv, &pozyx_set_pwr_req, &pozyx_set_pwr_res,
+                                    pozyx_set_pwr_callback));
 
   // Optional prepare for avoiding allocations during spin
   RCCHECK(rclc_executor_prepare(&executor));
@@ -462,6 +472,15 @@ void boot_bootlaoder_callback(const void *boot_bootlaoder_req, void *boot_bootla
   should_jump_to_bootloader = true;
   res->message = micro_ros_string_utilities_init("Booting into bootloader!");
   res->success = true;
+}
+
+void pozyx_set_pwr_callback(const void *pozyx_set_pwr_req, void *pozyx_set_pwr_res) {
+  // Cast messages to expected types
+  mobi_interfaces__srv__SetPower_Request *req = (mobi_interfaces__srv__SetPower_Request *)pozyx_set_pwr_req;
+  mobi_interfaces__srv__SetPower_Response *res = (mobi_interfaces__srv__SetPower_Response *)pozyx_set_pwr_res;
+
+  res->old_state = pwr_manager_get_power_pozyx();
+  pwr_manager_set_power_pozyx(req->state);
 }
 
 void cmd_vel_callback(const void *msgin) {
