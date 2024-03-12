@@ -74,6 +74,10 @@ void Error_Handler(void);
 #define B1_EXTI_IRQn EXTI15_10_IRQn
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOH
+#define ONOFF_LED_STRIP_Pin GPIO_PIN_1
+#define ONOFF_LED_STRIP_GPIO_Port GPIOC
+#define ONOFF_POZYX_Pin GPIO_PIN_3
+#define ONOFF_POZYX_GPIO_Port GPIOC
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3

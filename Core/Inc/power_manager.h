@@ -29,4 +29,15 @@ void pwr_manager_init(pwr_manager_t *pwr_manager, ADC_HandleTypeDef *hadc);
 
 void pwr_manager_read_battery_voltage(pwr_manager_t *pwr_manager);
 
+void pwr_manager_set_power_pozyx(bool pwr);
+void pwr_manager_set_power_led(bool pwr);
+
+bool pwr_manager_get_power_pozyx(void);
+bool pwr_manager_get_power_led(void);
+
+void pwr_manager_toggle_power_pozyx(void);
+void pwr_manager_toggle_power_led(void);
+
+bool pwr_manager_check_for_battery_warning(pwr_manager_t *pwr_manager);
+
 #endif /* __POWER_MANAGER_H_ */
