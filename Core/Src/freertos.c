@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <geometry_msgs/msg/twist.h>
+#include <math.h>
 #include <micro_ros_utilities/string_utilities.h>
 #include <mobi_interfaces/msg/encoders_stamped.h>
 #include <mobi_interfaces/srv/get_imu_calib_data.h>
@@ -97,12 +98,19 @@ sensor_msgs__msg__Imu imu_msg = {
 };
 sensor_msgs__msg__BatteryState battery_state_msg = {
   .header.frame_id = "battery",
+  .voltage = 0,
+
   .power_supply_status = 0,
   .power_supply_technology = 2,
   .power_supply_health = 0,
   .design_capacity = 10.4,
   .present = true,
-  .voltage = 0,
+
+  .temperature = NAN,
+  .current = NAN,
+  .charge = NAN,
+  .capacity = NAN,
+  .percentage = NAN,
 };
 
 // Subscribers
@@ -360,6 +368,7 @@ void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time) {
   // Battery voltage
   pwr_manager_read_battery_voltage(&pwr_manager);
   battery_state_msg.voltage = pwr_manager.battery_voltage;
+  battery_state_msg.present = pwr_manager.battery_voltage != 0;
   stamp_header(&battery_state_msg.header.stamp);
   RCCHECK(rcl_publish(&battery_state_pub, &battery_state_msg, NULL));
 }
