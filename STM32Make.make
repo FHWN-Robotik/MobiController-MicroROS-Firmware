@@ -36,6 +36,7 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
+Core/Src/ARGB.c \
 Core/Src/adc.c \
 Core/Src/bno055_dma.c \
 Core/Src/bootloader.c \
@@ -48,6 +49,7 @@ Core/Src/gpio.c \
 Core/Src/hcsr04.c \
 Core/Src/i2c.c \
 Core/Src/interrupts.c \
+Core/Src/led_strip.c \
 Core/Src/main.c \
 Core/Src/power_manager.c \
 Core/Src/stm32l4xx_hal_msp.c \

@@ -34,6 +34,7 @@
 #include "canlib.h"
 #include "encoder.h"
 #include "hcsr04.h"
+#include "led_strip.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -72,6 +73,8 @@ hcsr04_t ultra_6;
 pwr_manager_t pwr_manager = {
   .battery_warning_triggerd = false,
 };
+
+led_strip_t led_strip;
 
 /* USER CODE END PV */
 
@@ -125,6 +128,8 @@ int main(void) {
   MX_ADC1_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   printf("Initializing i2c devices...\n");
   bno055_init(&imu, &hi2c1, BNO055_I2C_ADDR_LO);
@@ -155,6 +160,11 @@ int main(void) {
 
   printf("Init power manager...\n");
   pwr_manager_init(&pwr_manager, &hadc1);
+
+  printf("Init led stip...\n");
+  led_strip_init(&led_strip);
+  pwr_manager_set_power_led(true);
+  led_strip_power_on_animation(&led_strip, &(mobi_interfaces__msg__ColorRGBW){.r = 0, .g = 220, .b = 255, .w = 0});
 
   printf("Starting FreeRTOS...\n");
   /* USER CODE END 2 */
@@ -290,6 +300,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     hcsr04_handle_period_elapsed_interrupt(&ultra_5);
   } else if (htim->Channel == ultra_6.active_channel && htim == ultra_6.htim) { // US 6
     hcsr04_handle_period_elapsed_interrupt(&ultra_6);
+  }
+
+  // LED Strip loop
+  if (htim->Instance == TIM6) {
+    led_strip_handle_timer_interrupt(&led_strip);
   }
   /* USER CODE END Callback 1 */
 }

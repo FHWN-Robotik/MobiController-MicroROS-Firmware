@@ -60,8 +60,10 @@ extern DMA_HandleTypeDef hdma_adc1;
 extern DMA_HandleTypeDef hdma_i2c1_rx;
 extern DMA_HandleTypeDef hdma_i2c1_tx;
 extern I2C_HandleTypeDef hi2c1;
+extern DMA_HandleTypeDef hdma_tim3_ch1_trig;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim16;
 
 /* USER CODE BEGIN EV */
@@ -169,16 +171,42 @@ void EXTI1_IRQHandler(void) {
 }
 
 /**
+ * @brief This function handles DMA1 channel1 global interrupt.
+ */
+void DMA1_Channel1_IRQHandler(void) {
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc1);
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel1_IRQn 1 */
+}
+
+/**
  * @brief This function handles DMA1 channel6 global interrupt.
  */
 void DMA1_Channel6_IRQHandler(void) {
   /* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
 
   /* USER CODE END DMA1_Channel6_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_i2c1_tx);
+  HAL_DMA_IRQHandler(&hdma_tim3_ch1_trig);
   /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
 
   /* USER CODE END DMA1_Channel6_IRQn 1 */
+}
+
+/**
+ * @brief This function handles DMA1 channel7 global interrupt.
+ */
+void DMA1_Channel7_IRQHandler(void) {
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_i2c1_rx);
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 1 */
 }
 
 /**
@@ -276,16 +304,16 @@ void EXTI15_10_IRQHandler(void) {
 }
 
 /**
- * @brief This function handles DMA2 channel3 global interrupt.
+ * @brief This function handles TIM6 global interrupt, DAC channel1 underrun error interrupt.
  */
-void DMA2_Channel3_IRQHandler(void) {
-  /* USER CODE BEGIN DMA2_Channel3_IRQn 0 */
+void TIM6_DAC_IRQHandler(void) {
+  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
 
-  /* USER CODE END DMA2_Channel3_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_adc1);
-  /* USER CODE BEGIN DMA2_Channel3_IRQn 1 */
+  /* USER CODE END TIM6_DAC_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+  /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 
-  /* USER CODE END DMA2_Channel3_IRQn 1 */
+  /* USER CODE END TIM6_DAC_IRQn 1 */
 }
 
 /**
@@ -302,16 +330,16 @@ void USB_IRQHandler(void) {
 }
 
 /**
- * @brief This function handles DMA2 channel6 global interrupt.
+ * @brief This function handles DMA2 channel7 global interrupt.
  */
-void DMA2_Channel6_IRQHandler(void) {
-  /* USER CODE BEGIN DMA2_Channel6_IRQn 0 */
+void DMA2_Channel7_IRQHandler(void) {
+  /* USER CODE BEGIN DMA2_Channel7_IRQn 0 */
 
-  /* USER CODE END DMA2_Channel6_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_i2c1_rx);
-  /* USER CODE BEGIN DMA2_Channel6_IRQn 1 */
+  /* USER CODE END DMA2_Channel7_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_i2c1_tx);
+  /* USER CODE BEGIN DMA2_Channel7_IRQn 1 */
 
-  /* USER CODE END DMA2_Channel6_IRQn 1 */
+  /* USER CODE END DMA2_Channel7_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

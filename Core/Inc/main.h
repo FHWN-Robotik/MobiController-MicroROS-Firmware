@@ -34,6 +34,7 @@ extern "C" {
 #include "bno055_dma.h"
 #include "encoder.h"
 #include "hcsr04.h"
+#include "led_strip.h"
 #include "power_manager.h"
 
 /* USER CODE END Includes */
@@ -56,6 +57,8 @@ extern struct hcsr04_s ultra_5;
 extern struct hcsr04_s ultra_6;
 
 extern struct pwr_manager_s pwr_manager;
+
+extern struct led_strip_s led_strip;
 
 /* USER CODE END ET */
 
@@ -150,6 +153,8 @@ void Error_Handler(void);
 #define US_TRIG_4_GPIO_Port GPIOC
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+#define LED_OUT_Pin GPIO_PIN_4
+#define LED_OUT_GPIO_Port GPIOB
 #define US_TRIG_5_Pin GPIO_PIN_5
 #define US_TRIG_5_GPIO_Port GPIOB
 #define USER_BTN_Pin GPIO_PIN_8
