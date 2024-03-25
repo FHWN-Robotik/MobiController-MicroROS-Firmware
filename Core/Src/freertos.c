@@ -29,6 +29,7 @@
 #include <math.h>
 #include <micro_ros_utilities/string_utilities.h>
 #include <mobi_interfaces/msg/encoders_stamped.h>
+#include <mobi_interfaces/msg/ultra_ranges.h>
 #include <mobi_interfaces/srv/get_imu_calib_data.h>
 #include <mobi_interfaces/srv/get_imu_calib_status.h>
 #include <mobi_interfaces/srv/set_imu_calib_data.h>
@@ -51,8 +52,8 @@
 #include "bno055_dma.h"
 #include "bootloader.h"
 #include "canlib.h"
+#include "hcsr04.h"
 #include "utils.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,6 +89,7 @@ rcl_publisher_t temp_pup;
 rcl_publisher_t imu_pup;
 rcl_publisher_t encoders_pup;
 rcl_publisher_t battery_state_pub;
+rcl_publisher_t ultra_ranges_pup;
 
 // Publisher msgs
 std_msgs__msg__Bool msg_button;
@@ -113,6 +115,7 @@ sensor_msgs__msg__BatteryState battery_state_msg = {
   .capacity = NAN,
   .percentage = NAN,
 };
+mobi_interfaces__msg__UltraRanges ultra_ranges_msg; // This will be initialized in "start_ros_task"
 
 // Subscribers
 rcl_subscription_t cmd_vel_sub;
@@ -148,6 +151,7 @@ void *microros_zero_allocate(size_t number_of_elements, size_t size_of_element, 
 
 void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time);
 void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time);
+void timer_250ms_callback(rcl_timer_t *timer, int64_t last_call_time);
 void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *imu_get_calib_status_res);
 void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_get_calib_data_res);
 void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_set_calib_data_res);
@@ -230,6 +234,14 @@ void start_ros_task(void *argument) {
 
   // micro-ROS app
 
+  // Publishers
+  hcsr04_init_range_msg(&ultra_ranges_msg.front_left, micro_ros_string_utilities_init("front_left"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.front_right, micro_ros_string_utilities_init("front_right"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.center_left, micro_ros_string_utilities_init("center_left"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.center_right, micro_ros_string_utilities_init("center_right"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.rear_left, micro_ros_string_utilities_init("rear_left"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.rear_right, micro_ros_string_utilities_init("rear_right"));
+
   // Services
   rcl_service_t imu_get_calib_status_srv = rcl_get_zero_initialized_service();
   mobi_interfaces__srv__GetImuCalibStatus_Request imu_get_calib_status_req;
@@ -283,6 +295,8 @@ void start_ros_task(void *argument) {
                                       ROSIDL_GET_MSG_TYPE_SUPPORT(mobi_interfaces, msg, EncodersStamped), "/encoders"));
   RCCHECK(rclc_publisher_init_default(&battery_state_pub, &node,
                                       ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, BatteryState), "/battery_state"));
+  RCCHECK(rclc_publisher_init_default(&ultra_ranges_pup, &node,
+                                      ROSIDL_GET_MSG_TYPE_SUPPORT(mobi_interfaces, msg, UltraRanges), "/ultra_ranges"));
 
   // create subsribers
   RCCHECK(rclc_subscription_init_default(&cmd_vel_sub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
@@ -310,13 +324,17 @@ void start_ros_task(void *argument) {
   rcl_timer_t timer_100ms;
   RCCHECK(rclc_timer_init_default(&timer_100ms, &support, RCL_MS_TO_NS(100), timer_100ms_callback));
 
+  rcl_timer_t timer_250ms;
+  RCCHECK(rclc_timer_init_default(&timer_250ms, &support, RCL_MS_TO_NS(250), timer_250ms_callback))
+
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 8, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 9, &allocator));
 
   // Add Timers to executor
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_100ms));
+  RCCHECK(rclc_executor_add_timer(&executor, &timer_250ms));
 
   // Add Subscriptions to executor
   RCCHECK(rclc_executor_add_subscription(&executor, &cmd_vel_sub, &cmd_vel_msg, &cmd_vel_callback, ON_NEW_DATA));
@@ -411,6 +429,34 @@ void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
 
   stamp_header(&encoders_msg.header.stamp);
   RCCHECK(rcl_publish(&encoders_pup, &encoders_msg, NULL));
+}
+
+void timer_250ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
+  (void)last_call_time;
+
+  if (timer == NULL)
+    return;
+
+  // Publish ultrasonic sensors
+  hcsr04_measure(&ultra_1);
+  ultra_ranges_msg.front_left.range = ultra_1.range;
+  stamp_header(&ultra_ranges_msg.front_left.header.stamp);
+  hcsr04_measure(&ultra_2);
+  ultra_ranges_msg.front_right.range = ultra_2.range;
+  stamp_header(&ultra_ranges_msg.front_right.header.stamp);
+  hcsr04_measure(&ultra_3);
+  ultra_ranges_msg.rear_left.range = ultra_3.range;
+  stamp_header(&ultra_ranges_msg.rear_left.header.stamp);
+  hcsr04_measure(&ultra_4);
+  ultra_ranges_msg.rear_right.range = ultra_4.range;
+  stamp_header(&ultra_ranges_msg.rear_right.header.stamp);
+  hcsr04_measure(&ultra_5);
+  ultra_ranges_msg.center_left.range = ultra_5.range;
+  stamp_header(&ultra_ranges_msg.center_left.header.stamp);
+  hcsr04_measure(&ultra_6);
+  ultra_ranges_msg.center_right.range = ultra_6.range;
+  stamp_header(&ultra_ranges_msg.center_right.header.stamp);
+  RCCHECK(rcl_publish(&ultra_ranges_pup, &ultra_ranges_msg, NULL));
 }
 
 // Service callbacks

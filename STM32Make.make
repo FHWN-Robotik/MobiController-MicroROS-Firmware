@@ -45,6 +45,7 @@ Core/Src/dma.c \
 Core/Src/encoder.c \
 Core/Src/freertos.c \
 Core/Src/gpio.c \
+Core/Src/hcsr04.c \
 Core/Src/i2c.c \
 Core/Src/interrupts.c \
 Core/Src/main.c \
@@ -54,6 +55,7 @@ Core/Src/stm32l4xx_hal_timebase_tim.c \
 Core/Src/stm32l4xx_it.c \
 Core/Src/syscalls.c \
 Core/Src/system_stm32l4xx.c \
+Core/Src/tim.c \
 Core/Src/usart.c \
 Core/Src/utils.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c \

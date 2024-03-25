@@ -24,6 +24,7 @@
 #include "dma.h"
 #include "gpio.h"
 #include "i2c.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
 
@@ -32,6 +33,7 @@
 #include "bno055_dma.h"
 #include "canlib.h"
 #include "encoder.h"
+#include "hcsr04.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,6 +61,13 @@ encoder_t encoder_1;
 encoder_t encoder_2;
 encoder_t encoder_3;
 encoder_t encoder_4;
+
+hcsr04_t ultra_1;
+hcsr04_t ultra_2;
+hcsr04_t ultra_3;
+hcsr04_t ultra_4;
+hcsr04_t ultra_5;
+hcsr04_t ultra_6;
 
 pwr_manager_t pwr_manager = {
   .battery_warning_triggerd = false,
@@ -114,6 +123,8 @@ int main(void) {
   MX_I2C1_Init();
   MX_CAN1_Init();
   MX_ADC1_Init();
+  MX_TIM1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   printf("Initializing i2c devices...\n");
   bno055_init(&imu, &hi2c1, BNO055_I2C_ADDR_LO);
@@ -127,6 +138,20 @@ int main(void) {
   encoder_init(&encoder_2, ENCODER_2_A_GPIO_Port, ENCODER_2_A_Pin, ENCODER_2_B_GPIO_Port, ENCODER_2_B_Pin);
   encoder_init(&encoder_3, ENCODER_3_A_GPIO_Port, ENCODER_3_A_Pin, ENCODER_3_B_GPIO_Port, ENCODER_3_B_Pin);
   encoder_init(&encoder_4, ENCODER_4_A_GPIO_Port, ENCODER_4_A_Pin, ENCODER_4_B_GPIO_Port, ENCODER_4_B_Pin);
+
+  printf("Init Ultrasonic sensors...\n");
+  hcsr04_init(&ultra_1, &htim1, TIM_CHANNEL_1, HAL_TIM_ACTIVE_CHANNEL_1, TIM_IT_CC1, US_TRIG_1_GPIO_Port,
+              US_TRIG_1_Pin);
+  hcsr04_init(&ultra_2, &htim2, TIM_CHANNEL_3, HAL_TIM_ACTIVE_CHANNEL_3, TIM_IT_CC3, US_TRIG_2_GPIO_Port,
+              US_TRIG_2_Pin);
+  hcsr04_init(&ultra_3, &htim1, TIM_CHANNEL_2, HAL_TIM_ACTIVE_CHANNEL_2, TIM_IT_CC2, US_TRIG_3_GPIO_Port,
+              US_TRIG_3_Pin);
+  hcsr04_init(&ultra_4, &htim2, TIM_CHANNEL_1, HAL_TIM_ACTIVE_CHANNEL_1, TIM_IT_CC1, US_TRIG_4_GPIO_Port,
+              US_TRIG_4_Pin);
+  hcsr04_init(&ultra_5, &htim2, TIM_CHANNEL_4, HAL_TIM_ACTIVE_CHANNEL_4, TIM_IT_CC4, US_TRIG_5_GPIO_Port,
+              US_TRIG_5_Pin);
+  hcsr04_init(&ultra_6, &htim2, TIM_CHANNEL_2, HAL_TIM_ACTIVE_CHANNEL_2, TIM_IT_CC2, US_TRIG_6_GPIO_Port,
+              US_TRIG_6_Pin);
 
   printf("Init power manager...\n");
   pwr_manager_init(&pwr_manager, &hadc1);
@@ -239,7 +264,7 @@ void PeriphCommonClock_Config(void) {
 
 /**
  * @brief  Period elapsed callback in non blocking mode
- * @note   This function is called  when TIM1 interrupt took place, inside
+ * @note   This function is called  when TIM16 interrupt took place, inside
  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
  * a global variable "uwTick" used as application time base.
  * @param  htim : TIM handle
@@ -249,11 +274,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM1) {
+  if (htim->Instance == TIM16) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Channel == ultra_1.active_channel && htim == ultra_1.htim) { // US 1
+    hcsr04_handle_period_elapsed_interrupt(&ultra_1);
+  } else if (htim->Channel == ultra_2.active_channel && htim == ultra_2.htim) { // US 2
+    hcsr04_handle_period_elapsed_interrupt(&ultra_2);
+  } else if (htim->Channel == ultra_3.active_channel && htim == ultra_3.htim) { // US 3
+    hcsr04_handle_period_elapsed_interrupt(&ultra_3);
+  } else if (htim->Channel == ultra_4.active_channel && htim == ultra_4.htim) { // US 4
+    hcsr04_handle_period_elapsed_interrupt(&ultra_4);
+  } else if (htim->Channel == ultra_5.active_channel && htim == ultra_5.htim) { // US 5
+    hcsr04_handle_period_elapsed_interrupt(&ultra_5);
+  } else if (htim->Channel == ultra_6.active_channel && htim == ultra_6.htim) { // US 6
+    hcsr04_handle_period_elapsed_interrupt(&ultra_6);
+  }
   /* USER CODE END Callback 1 */
 }
 
