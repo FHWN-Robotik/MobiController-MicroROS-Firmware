@@ -105,9 +105,9 @@ sensor_msgs__msg__BatteryState battery_state_msg = {
   .header.frame_id = "battery",
   .voltage = 0,
 
-  .power_supply_status = 0,
-  .power_supply_technology = 2,
-  .power_supply_health = 0,
+  .power_supply_status = sensor_msgs__msg__BatteryState__POWER_SUPPLY_STATUS_UNKNOWN,
+  .power_supply_technology = sensor_msgs__msg__BatteryState__POWER_SUPPLY_TECHNOLOGY_LION,
+  .power_supply_health = sensor_msgs__msg__BatteryState__POWER_SUPPLY_HEALTH_UNKNOWN,
   .design_capacity = 10.4,
   .present = true,
 
@@ -406,7 +406,7 @@ void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time) {
   pwr_manager_read_battery_voltage(&pwr_manager);
   pwr_manager_check_for_battery_warning(&pwr_manager);
   battery_state_msg.voltage = pwr_manager.battery_voltage;
-  battery_state_msg.present = pwr_manager.battery_voltage != 0;
+  battery_state_msg.present = pwr_manager.is_battery_connected;
   stamp_header(&battery_state_msg.header.stamp);
   RCCHECK(rcl_publish(&battery_state_pub, &battery_state_msg, NULL));
 }
