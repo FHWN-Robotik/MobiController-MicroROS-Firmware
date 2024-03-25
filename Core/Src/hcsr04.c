@@ -32,10 +32,6 @@ void hcsr04_init(hcsr04_t *hcsr04, TIM_HandleTypeDef *htim, uint16_t tim_channel
 }
 
 void hcsr04_measure(hcsr04_t *hcsr04) {
-  // reset values just in case
-  hcsr04->overflow_count = 0;
-  hcsr04->is_first_captured = false;
-
   // Trigger
   HAL_GPIO_WritePin(hcsr04->gpio_trig_port, hcsr04->gpio_trig_pin, GPIO_PIN_SET);   // pull the TRIG pin HIGH
   osDelay(1);                                                                       // wait for 10 us
