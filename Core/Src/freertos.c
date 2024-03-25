@@ -237,12 +237,12 @@ void start_ros_task(void *argument) {
   // micro-ROS app
 
   // Publishers
-  hcsr04_init_range_msg(&ultra_ranges_msg.front_left, micro_ros_string_utilities_init("front_left"));
-  hcsr04_init_range_msg(&ultra_ranges_msg.front_right, micro_ros_string_utilities_init("front_right"));
-  hcsr04_init_range_msg(&ultra_ranges_msg.center_left, micro_ros_string_utilities_init("center_left"));
-  hcsr04_init_range_msg(&ultra_ranges_msg.center_right, micro_ros_string_utilities_init("center_right"));
-  hcsr04_init_range_msg(&ultra_ranges_msg.rear_left, micro_ros_string_utilities_init("rear_left"));
-  hcsr04_init_range_msg(&ultra_ranges_msg.rear_right, micro_ros_string_utilities_init("rear_right"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.front_left, micro_ros_string_utilities_init("us_front_left"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.front_right, micro_ros_string_utilities_init("us_front_right"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.center_left, micro_ros_string_utilities_init("us_center_left"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.center_right, micro_ros_string_utilities_init("us_center_right"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.rear_left, micro_ros_string_utilities_init("us_rear_left"));
+  hcsr04_init_range_msg(&ultra_ranges_msg.rear_right, micro_ros_string_utilities_init("us_rear_right"));
 
   // Services
   rcl_service_t imu_get_calib_status_srv = rcl_get_zero_initialized_service();
