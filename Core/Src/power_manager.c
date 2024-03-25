@@ -7,16 +7,18 @@
  * ----------------------------------------------------------------------------------------------------------------------------------------------
  */
 
-#include "power_manager.h"
+#include <rcutils/logging_macros.h>
+
 #include "adc.h"
 #include "gpio.h"
-#include "stdio.h"
+#include "power_manager.h"
 
 void pwr_manager_init(pwr_manager_t *pwr_manager, ADC_HandleTypeDef *hadc) {
   pwr_manager->adc = hadc;
   pwr_manager->adc_res = 0;
   pwr_manager->battery_voltage = 0;
   pwr_manager->battery_warning_triggerd = false;
+  pwr_manager->is_battery_connected = true; // Assume a battery is connected.
 
   HAL_ADCEx_Calibration_Start(hadc, ADC_SINGLE_ENDED);
 
@@ -47,17 +49,25 @@ void pwr_manager_toggle_power_pozyx() { HAL_GPIO_TogglePin(ONOFF_POZYX_GPIO_Port
 
 void pwr_manager_toggle_power_led() { HAL_GPIO_TogglePin(ONOFF_LED_STRIP_GPIO_Port, ONOFF_LED_STRIP_Pin); }
 
-bool pwr_manager_check_for_battery_warning(pwr_manager_t *pwr_manager) {
+void pwr_manager_check_for_battery_warning(pwr_manager_t *pwr_manager) {
   // Check if a battery is connected
   if (pwr_manager->battery_voltage == 0) {
-    printf("There is no battery connected, ignoring low battery voltage\n");
-    return false;
+    if (pwr_manager->is_battery_connected) {
+      RCUTILS_LOG_WARN_NAMED(LOGGER_NAME, "There is no battery connected, ignoring low battery voltage.");
+      pwr_manager->is_battery_connected = false;
+    }
+    return;
+  }
+
+  // If we get here, assume a bettery to be connected.
+  if (!pwr_manager->is_battery_connected) {
+    RCUTILS_LOG_WARN_NAMED(LOGGER_NAME, "There is a battery connected.");
+    pwr_manager->is_battery_connected = true;
   }
 
   // Check if the battery voltage is bellow 11 V
   if (pwr_manager->battery_voltage <= 11.1) {
     pwr_manager->battery_warning_triggerd = true;
-    return true;
+    return;
   }
-  return false;
 }

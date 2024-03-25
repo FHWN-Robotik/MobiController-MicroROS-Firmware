@@ -23,6 +23,7 @@ typedef struct pwr_manager_s {
 
   uint32_t adc_res;
   float battery_voltage;
+  bool is_battery_connected;
 } pwr_manager_t;
 
 void pwr_manager_init(pwr_manager_t *pwr_manager, ADC_HandleTypeDef *hadc);
@@ -38,6 +39,6 @@ bool pwr_manager_get_power_led(void);
 void pwr_manager_toggle_power_pozyx(void);
 void pwr_manager_toggle_power_led(void);
 
-bool pwr_manager_check_for_battery_warning(pwr_manager_t *pwr_manager);
+void pwr_manager_check_for_battery_warning(pwr_manager_t *pwr_manager);
 
 #endif /* __POWER_MANAGER_H_ */

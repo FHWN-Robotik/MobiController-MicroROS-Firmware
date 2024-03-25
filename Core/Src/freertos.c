@@ -70,7 +70,7 @@ typedef StaticTask_t osStaticThreadDef_t;
   {                                                                                                                    \
     rcl_ret_t temp_rc = fn;                                                                                            \
     if ((temp_rc != RCL_RET_OK)) {                                                                                     \
-      RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Failed status on line %d: %d. Aborting.\n", __LINE__, (int)temp_rc);       \
+      RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Failed status on line %d: %d. Aborting.", __LINE__, (int)temp_rc);         \
       return;                                                                                                          \
     }                                                                                                                  \
   }
@@ -231,7 +231,7 @@ void start_ros_task(void *argument) {
   freeRTOS_allocator.zero_allocate = microros_zero_allocate;
 
   if (!rcutils_set_default_allocator(&freeRTOS_allocator)) {
-    RCUTILS_LOG_ERROR_NAMED(LOGGER_NAME, "Error on default allocators (line %d)\n", __LINE__);
+    RCUTILS_LOG_ERROR_NAMED(LOGGER_NAME, "Error on default allocators (line %d)", __LINE__);
   }
 
   // micro-ROS app
@@ -404,6 +404,7 @@ void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time) {
 
   // Battery voltage
   pwr_manager_read_battery_voltage(&pwr_manager);
+  pwr_manager_check_for_battery_warning(&pwr_manager);
   battery_state_msg.voltage = pwr_manager.battery_voltage;
   battery_state_msg.present = pwr_manager.battery_voltage != 0;
   stamp_header(&battery_state_msg.header.stamp);
@@ -477,7 +478,7 @@ void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *i
     (mobi_interfaces__srv__GetImuCalibStatus_Response *)imu_get_calib_status_res;
 
   // Handle request message and set the response message values
-  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client requested IMU calibration status.\n");
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client requested IMU calibration status.");
 
   bno055_read_calibration_state(&imu);
   while (!imu.reading_device == BNO055_DEVICE_NONE) {
@@ -494,7 +495,7 @@ void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_g
     (mobi_interfaces__srv__GetImuCalibData_Response *)imu_get_calib_data_res;
 
   // Handle request message and set the response message values
-  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client requested IMU calibration data.\n");
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client requested IMU calibration data.");
 
   bno055_read_calibration_data(&imu);
   while (!imu.reading_device == BNO055_DEVICE_NONE) {
@@ -511,12 +512,12 @@ void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_s
     (mobi_interfaces__srv__SetImuCalibData_Response *)imu_set_calib_data_res;
 
   // Handle request message and set the response message values
-  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client set IMU calibration data.\n");
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client set IMU calibration data.");
 
   bno055_set_calibration_data(&imu, req);
 
   res->success = true;
-  res->message = micro_ros_string_utilities_init("Set IMU calibration data successfully.\n");
+  res->message = micro_ros_string_utilities_init("Set IMU calibration data successfully.");
 }
 
 void boot_bootlaoder_callback(const void *boot_bootlaoder_req, void *boot_bootlaoder_res) {
@@ -543,7 +544,7 @@ void cmd_vel_callback(const void *msgin) {
   const geometry_msgs__msg__Twist *msg = (const geometry_msgs__msg__Twist *)msgin;
 
   // Process message
-  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "CMD_VEL --> x: %f, y: %f, phi: %f\n", msg->linear.x, msg->linear.y,
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "CMD_VEL --> x: %f, y: %f, phi: %f", msg->linear.x, msg->linear.y,
                           msg->angular.z);
 
   int16_t speed = 500;
@@ -558,6 +559,6 @@ void cmd_vel_callback(const void *msgin) {
   int16_t vphi = rot_speed * msg->angular.z;
 
   HAL_StatusTypeDef status = canlib_drive(&can, vx, vy, vphi);
-  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Status: %d\n", status);
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Status: %d", status);
 }
 /* USER CODE END Application */

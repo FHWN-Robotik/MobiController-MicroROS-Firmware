@@ -58,8 +58,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
 
   pwr_manager.battery_voltage =
     __LL_ADC_CALC_DATA_TO_VOLTAGE(3300UL, pwr_manager.adc_res, LL_ADC_RESOLUTION_12B) * (14 / 3.3) * 0.001;
-
-  (void)pwr_manager_check_for_battery_warning(&pwr_manager);
 }
 
 /*
