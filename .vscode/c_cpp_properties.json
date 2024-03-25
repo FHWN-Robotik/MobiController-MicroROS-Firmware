@@ -145,6 +145,7 @@
         "micro_ros_stm32cubemx_utils/microros_static_library/libmicroros/microros_include/visualization_msgs/srv/detail"
       ],
       "defines": [
+        "RCUTILS_LOG_MIN_SEVERITY=RCUTILS_LOG_MIN_SEVERITY_DEBUG",
         "STM32L452xx",
         "USE_FULL_ASSERT",
         "USE_HAL_DRIVER"

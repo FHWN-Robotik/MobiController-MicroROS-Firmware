@@ -38,6 +38,7 @@
 #include <rcl/rcl.h>
 #include <rclc/executor.h>
 #include <rclc/rclc.h>
+#include <rcutils/logging.h>
 #include <rmw_microros/rmw_microros.h>
 #include <rmw_microxrcedds_c/config.h>
 #include <rosidl_runtime_c/service_type_support_struct.h>
@@ -54,6 +55,7 @@
 #include "canlib.h"
 #include "hcsr04.h"
 #include "utils.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,7 +70,7 @@ typedef StaticTask_t osStaticThreadDef_t;
   {                                                                                                                    \
     rcl_ret_t temp_rc = fn;                                                                                            \
     if ((temp_rc != RCL_RET_OK)) {                                                                                     \
-      printf("Failed status on line %d: %d. Aborting.\n", __LINE__, (int)temp_rc);                                     \
+      RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Failed status on line %d: %d. Aborting.\n", __LINE__, (int)temp_rc);       \
       return;                                                                                                          \
     }                                                                                                                  \
   }
@@ -229,7 +231,7 @@ void start_ros_task(void *argument) {
   freeRTOS_allocator.zero_allocate = microros_zero_allocate;
 
   if (!rcutils_set_default_allocator(&freeRTOS_allocator)) {
-    printf("Error on default allocators (line %d)\n", __LINE__);
+    RCUTILS_LOG_ERROR_NAMED(LOGGER_NAME, "Error on default allocators (line %d)\n", __LINE__);
   }
 
   // micro-ROS app
@@ -271,6 +273,10 @@ void start_ros_task(void *argument) {
   rcl_node_t node;
 
   allocator = rcl_get_default_allocator();
+
+  // Setup logging
+  RCCHECK(rcutils_logging_initialize_with_allocator(allocator));
+  rcutils_logging_set_default_logger_level(RCUTILS_LOG_SEVERITY_DEBUG);
 
   RCCHECK(rcl_init_options_init(&init_options, allocator));
 
@@ -468,7 +474,7 @@ void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *i
     (mobi_interfaces__srv__GetImuCalibStatus_Response *)imu_get_calib_status_res;
 
   // Handle request message and set the response message values
-  printf("Client requested IMU calibration status.\n");
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client requested IMU calibration status.\n");
 
   bno055_read_calibration_state(&imu);
   while (!imu.reading_device == BNO055_DEVICE_NONE) {
@@ -485,7 +491,7 @@ void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_g
     (mobi_interfaces__srv__GetImuCalibData_Response *)imu_get_calib_data_res;
 
   // Handle request message and set the response message values
-  printf("Client requested IMU calibration data.\n");
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client requested IMU calibration data.\n");
 
   bno055_read_calibration_data(&imu);
   while (!imu.reading_device == BNO055_DEVICE_NONE) {
@@ -502,7 +508,7 @@ void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_s
     (mobi_interfaces__srv__SetImuCalibData_Response *)imu_set_calib_data_res;
 
   // Handle request message and set the response message values
-  printf("Client set IMU calibration data.\n");
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client set IMU calibration data.\n");
 
   bno055_set_calibration_data(&imu, req);
 
@@ -534,7 +540,8 @@ void cmd_vel_callback(const void *msgin) {
   const geometry_msgs__msg__Twist *msg = (const geometry_msgs__msg__Twist *)msgin;
 
   // Process message
-  printf("CMD_VEL --> x: %f, y: %f, phi: %f\n", msg->linear.x, msg->linear.y, msg->angular.z);
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "CMD_VEL --> x: %f, y: %f, phi: %f\n", msg->linear.x, msg->linear.y,
+                          msg->angular.z);
 
   int16_t speed = 500;
   int16_t rot_speed = 2000;
@@ -548,6 +555,6 @@ void cmd_vel_callback(const void *msgin) {
   int16_t vphi = rot_speed * msg->angular.z;
 
   HAL_StatusTypeDef status = canlib_drive(&can, vx, vy, vphi);
-  printf("Status: %d\n", status);
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Status: %d\n", status);
 }
 /* USER CODE END Application */

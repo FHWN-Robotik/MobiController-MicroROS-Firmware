@@ -22,6 +22,7 @@ ldscript: STM32L452RETxP_FLASH.ld # linker script
 # Compiler definitions. The -D prefix for the compiler will be automatically added.
 cDefinitions:
   - USE_FULL_ASSERT
+  - RCUTILS_LOG_MIN_SEVERITY=RCUTILS_LOG_MIN_SEVERITY_DEBUG #[DEBUG|INFO|WARN|ERROR|FATAL]
 cxxDefinitions: []
 asDefinitions: []
 

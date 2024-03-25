@@ -156,7 +156,7 @@ void Error_Handler(void);
 #define USER_BTN_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define LOGGER_NAME "MOBI"
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
