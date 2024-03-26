@@ -31,6 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bno055_dma.h"
+#include "bootloader.h"
 #include "canlib.h"
 #include "encoder.h"
 #include "hcsr04.h"
@@ -131,6 +132,25 @@ int main(void) {
   MX_TIM3_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
+
+  printf("Init power manager...\n");
+  pwr_manager_init(&pwr_manager, &hadc1);
+
+  printf("Init led stip...\n");
+  led_strip_init(&led_strip);
+  pwr_manager_set_power_led(true);
+  led_strip_power_on_animation(&led_strip, &(mobi_interfaces__msg__ColorRGBW){.r = 0, .g = 220, .b = 255, .w = 0});
+
+  // Should boot to bootloader?
+  bool btn_state = !(bool)HAL_GPIO_ReadPin(USER_BTN_GPIO_Port, USER_BTN_Pin);
+  if (btn_state) {
+    pwr_manager_set_power_led(true);
+    led_strip_power_on_animation(&led_strip, &(mobi_interfaces__msg__ColorRGBW){.r = 255, .g = 0, .b = 100, .w = 0});
+    HAL_Delay(1800);
+    jump_to_bootloader();
+    return 0;
+  }
+
   printf("Initializing i2c devices...\n");
   bno055_init(&imu, &hi2c1, BNO055_I2C_ADDR_LO);
 
@@ -157,14 +177,6 @@ int main(void) {
               US_TRIG_5_Pin);
   hcsr04_init(&ultra_6, &htim2, TIM_CHANNEL_2, HAL_TIM_ACTIVE_CHANNEL_2, TIM_IT_CC2, US_TRIG_6_GPIO_Port,
               US_TRIG_6_Pin);
-
-  printf("Init power manager...\n");
-  pwr_manager_init(&pwr_manager, &hadc1);
-
-  printf("Init led stip...\n");
-  led_strip_init(&led_strip);
-  pwr_manager_set_power_led(true);
-  led_strip_power_on_animation(&led_strip, &(mobi_interfaces__msg__ColorRGBW){.r = 0, .g = 220, .b = 255, .w = 0});
 
   printf("Starting FreeRTOS...\n");
   /* USER CODE END 2 */
