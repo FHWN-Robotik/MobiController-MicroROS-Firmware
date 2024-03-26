@@ -16,7 +16,7 @@
 #include "i2c.h"
 #include "stm32l452xx.h"
 #include "stm32l4xx_hal.h"
-// #include "tim.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
 
@@ -32,11 +32,14 @@ void jump_to_bootloader(void) {
 
   // De-init all peripherals
   HAL_ADC_DeInit(&hadc1);
-  // HAL_TIM_PWM_DeInit(&htim1);
-  // HAL_TIM_Base_DeInit(&htim1);
-  // HAL_TIM_Base_DeInit(&htim6);
+  HAL_TIM_Base_DeInit(&htim1);
+  HAL_TIM_Base_DeInit(&htim2);
+  HAL_TIM_Base_DeInit(&htim3);
+  HAL_TIM_PWM_DeInit(&htim3);
+  HAL_TIM_Base_DeInit(&htim6);
   HAL_UART_DeInit(&huart2);
   HAL_CAN_DeInit(&hcan1);
+  HAL_I2C_DeInit(&hi2c1);
 
   // Disable Systick
   SysTick->CTRL = 0;
