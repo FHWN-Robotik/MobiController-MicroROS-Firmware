@@ -23,6 +23,8 @@ static uint16_t twos_complement(int16_t num) { return (uint16_t)(~num + 1); }
 
 double clamp(double d, double min, double max);
 
+uint8_t round_half_up_unscaled(double value, uint8_t SCALING);
+
 #ifdef __cplusplus
 }
 #endif

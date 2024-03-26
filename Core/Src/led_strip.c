@@ -2,6 +2,7 @@
 #include "ARGB.h"
 #include "main.h"
 #include "tim.h"
+#include "utils.h"
 
 /*
   ARGB Overwrites
@@ -71,10 +72,11 @@ void led_strip_handle_timer_interrupt(led_strip_t *led_strip) {
   case mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_BLINK: {
     if (led_strip->current_frame == 0) {
       // fill_rgbw(led_strip->animation_config.color);
-      uint8_t offset = NUM_PIXELS * 10 / led_strip->animation_config.line_count;
+      uint8_t offset = round_half_up_unscaled(NUM_PIXELS * 10 / led_strip->animation_config.line_count, 10);
       for (size_t i = 0; i < led_strip->animation_config.line_count; i++) {
         uint8_t start =
-          (i * offset) + led_strip->current_frame * (NUM_PIXELS * 10 / led_strip->animation_config.frame_count);
+          (i * offset) + led_strip->current_frame *
+                           round_half_up_unscaled(NUM_PIXELS * 10 / led_strip->animation_config.frame_count, 10);
         uint8_t end = start + led_strip->animation_config.line_length;
         led_strip_fill_range_rgbw(start, end, &led_strip->animation_config.color);
       }
@@ -89,25 +91,25 @@ void led_strip_handle_timer_interrupt(led_strip_t *led_strip) {
     led_strip_clear();
 
     if (led_strip->animation_config.rotate_left) {
-      uint8_t offset = NUM_PIXELS * 10 / led_strip->animation_config.line_count;
+      uint8_t offset = round_half_up_unscaled(NUM_PIXELS * 10 / led_strip->animation_config.line_count, 10);
       for (size_t i = 0; i < led_strip->animation_config.line_count; i++) {
-        // uint8_t start = (i * offset) + NUM_PIXELS - (led_strip->current_frame * etl::round_half_up_unscaled<10,
-        // uint8_t>(NUM_PIXELS * 10 / led_strip->animation_config.frame_count));
         uint8_t start = (i * offset) + (NUM_PIXELS - 1) -
-                        led_strip->current_frame * (NUM_PIXELS * 10 / led_strip->animation_config.frame_count);
+                        led_strip->current_frame *
+                          round_half_up_unscaled(NUM_PIXELS * 10 / led_strip->animation_config.frame_count, 10);
         uint8_t end = start + led_strip->animation_config.line_length;
         led_strip_fill_range_rgbw(start, end, &led_strip->animation_config.color);
       }
     } else {
 
-      uint8_t offset = NUM_PIXELS * 10 / led_strip->animation_config.line_count;
+      uint8_t offset = round_half_up_unscaled(NUM_PIXELS * 10 / led_strip->animation_config.line_count, 10);
       for (size_t i = 0; i < led_strip->animation_config.line_count; i++) {
         // offset between the lines + the current frame * NUM_PIXELS / frame_count
         // offset -> spacing
         // current frame -> movement
         // NUM_PIXELS / frame_count -> scaling to the whole led strip
         uint8_t start =
-          (i * offset) + led_strip->current_frame * (NUM_PIXELS * 10 / led_strip->animation_config.frame_count);
+          (i * offset) + led_strip->current_frame *
+                           round_half_up_unscaled(NUM_PIXELS * 10 / led_strip->animation_config.frame_count, 10);
         uint8_t end = start + led_strip->animation_config.line_length;
         led_strip_fill_range_rgbw(start, end, &led_strip->animation_config.color);
       }

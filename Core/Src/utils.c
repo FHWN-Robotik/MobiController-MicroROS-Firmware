@@ -24,3 +24,18 @@ double clamp(double d, double min, double max) {
   const double t = d < min ? min : d;
   return t > max ? max : t;
 }
+
+//***************************************************************************
+/// Round to nearest integer. 'Half' value is rounded up (to infinity).
+/// Uses 'symmetric up' rounding.
+/// \param value Scaled integral.
+/// \param SCALING Scaling must be divisible by 2
+/// \return Unscaled, rounded integral.
+//***************************************************************************
+uint8_t round_half_up_unscaled(double value, uint8_t SCALING) {
+  if (value >= 0) {
+    return (value + (SCALING / 2U)) / SCALING;
+  } else {
+    return (value - (SCALING / 2U)) / SCALING;
+  }
+}
