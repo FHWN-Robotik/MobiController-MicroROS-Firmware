@@ -25,6 +25,7 @@ typedef struct led_strip_s {
 // Init led strip
 void led_strip_init(led_strip_t *led_strip);
 
+void led_strip_clear();
 /*
   Custom led functions
 */
@@ -67,7 +68,7 @@ void led_strip_battery_warning_light(led_strip_t *led_strip);
 void led_strip_power_on_animation(led_strip_t *led_strip, mobi_interfaces__msg__ColorRGBW *color);
 
 // Beacon light with RGBW color
-void led_strip_beacon_rgbw(led_strip_t *led_strip, mobi_interfaces__msg__ColorRGBW color, uint8_t update_rate,
+void led_strip_beacon_rgbw(led_strip_t *led_strip, mobi_interfaces__msg__ColorRGBW *color, uint8_t update_rate,
                            uint8_t frame_count, uint8_t line_length, uint8_t line_count, bool rotate_left);
 
 // Blink the whole stip or sections in a color;

@@ -16,6 +16,8 @@ void led_strip_init(led_strip_t *led_strip) {
   HAL_TIM_Base_Start_IT(&htim6);
 }
 
+void led_strip_clear() { ARGB_Clear(); }
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -40,7 +42,7 @@ void led_strip_update() {
 }
 
 void led_strip_clear_and_update() {
-  ARGB_Clear();
+  led_strip_clear();
   led_strip_update();
 }
 
@@ -78,13 +80,13 @@ void led_strip_handle_timer_interrupt(led_strip_t *led_strip) {
       }
     }
     if (led_strip->current_frame == 1)
-      ARGB_Clear();
+      led_strip_clear();
 
     led_strip_update();
     break;
   }
   case mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_BEACON: {
-    ARGB_Clear();
+    led_strip_clear();
 
     if (led_strip->animation_config.rotate_left) {
       uint8_t offset = NUM_PIXELS * 10 / led_strip->animation_config.line_count;
@@ -121,7 +123,7 @@ void led_strip_handle_timer_interrupt(led_strip_t *led_strip) {
       break;
     }
 
-    ARGB_Clear();
+    led_strip_clear();
 
     uint8_t start = 0;
     uint8_t end = NUM_PIXELS;
@@ -173,10 +175,12 @@ void led_strip_start_animation(led_strip_t *led_strip, mobi_interfaces__srv__Set
 void led_strip_driving_light() {
   uint8_t quater = NUM_PIXELS / 4;
 
-  led_strip_fill_range_rgbw(0, quater,
-                            &(mobi_interfaces__msg__ColorRGBW){.r = 0, .g = 0, .b = 0, .w = 255}); // Head light
+  // Head light
+  led_strip_fill_range_rgbw(0, quater, &(mobi_interfaces__msg__ColorRGBW){.r = 0, .g = 0, .b = 0, .w = 255});
+
+  // Tail light
   led_strip_fill_range_rgbw(2 * quater + 1, 3 * quater + 1,
-                            &(mobi_interfaces__msg__ColorRGBW){.r = 255, .g = 0, .b = 0, .w = 0}); // Tail light
+                            &(mobi_interfaces__msg__ColorRGBW){.r = 255, .g = 0, .b = 0, .w = 0});
   led_strip_update();
 }
 
@@ -189,11 +193,11 @@ void led_strip_power_on_animation(led_strip_t *led_strip, mobi_interfaces__msg__
   led_strip_fill(led_strip, color, 1, NUM_PIXELS * 2);
 }
 
-void led_strip_beacon_rgbw(led_strip_t *led_strip, mobi_interfaces__msg__ColorRGBW color, uint8_t update_rate,
+void led_strip_beacon_rgbw(led_strip_t *led_strip, mobi_interfaces__msg__ColorRGBW *color, uint8_t update_rate,
                            uint8_t frame_count, uint8_t line_length, uint8_t line_count, bool rotate_left) {
   mobi_interfaces__srv__SetLedStrip_Request animation;
   animation.type = mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_BEACON;
-  animation.color = color;
+  animation.color = *color;
   animation.frame_count = frame_count;
   animation.update_rate = update_rate;
   animation.line_length = line_length;

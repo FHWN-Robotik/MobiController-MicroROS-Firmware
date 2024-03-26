@@ -33,6 +33,7 @@
 #include <mobi_interfaces/srv/get_imu_calib_data.h>
 #include <mobi_interfaces/srv/get_imu_calib_status.h>
 #include <mobi_interfaces/srv/set_imu_calib_data.h>
+#include <mobi_interfaces/srv/set_led_strip.h>
 #include <mobi_interfaces/srv/set_power.h>
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
@@ -159,6 +160,7 @@ void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_g
 void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_set_calib_data_res);
 void boot_bootlaoder_callback(const void *boot_bootlaoder_req, void *boot_bootlaoder_res);
 void pozyx_set_pwr_callback(const void *pozyx_set_pwr_req, void *pozyx_set_pwr_res);
+void led_strip_set_callback(const void *led_strip_set_req, void *led_strip_set_res);
 void cmd_vel_callback(const void *msgin);
 /* USER CODE END FunctionPrototypes */
 
@@ -265,6 +267,10 @@ void start_ros_task(void *argument) {
   mobi_interfaces__srv__SetPower_Request pozyx_set_pwr_req;
   mobi_interfaces__srv__SetPower_Response pozyx_set_pwr_res;
 
+  rcl_service_t led_strip_set_srv = rcl_get_zero_initialized_service();
+  mobi_interfaces__srv__SetLedStrip_Request led_strip_set_req;
+  mobi_interfaces__srv__SetLedStrip_Response led_strip_set_res;
+
   // RCLC Support
   rclc_support_t support;
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
@@ -325,6 +331,8 @@ void start_ros_task(void *argument) {
                                     "/boot_bootloader"));
   RCCHECK(rclc_service_init_default(&pozyx_set_pwr_srv, &node,
                                     ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetPower), "/pozyx_set_power"));
+  RCCHECK(rclc_service_init_default(&led_strip_set_srv, &node,
+                                    ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetLedStrip), "/led_strip_set"));
 
   // Timers
   rcl_timer_t timer_1s;
@@ -338,7 +346,7 @@ void start_ros_task(void *argument) {
 
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 9, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 10, &allocator));
 
   // Add Timers to executor
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
@@ -359,6 +367,8 @@ void start_ros_task(void *argument) {
                                     boot_bootlaoder_callback));
   RCCHECK(rclc_executor_add_service(&executor, &pozyx_set_pwr_srv, &pozyx_set_pwr_req, &pozyx_set_pwr_res,
                                     pozyx_set_pwr_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &led_strip_set_srv, &led_strip_set_req, &led_strip_set_res,
+                                    led_strip_set_callback));
 
   // Optional prepare for avoiding allocations during spin
   RCCHECK(rclc_executor_prepare(&executor));
@@ -541,6 +551,64 @@ void pozyx_set_pwr_callback(const void *pozyx_set_pwr_req, void *pozyx_set_pwr_r
 
   res->old_state = pwr_manager_get_power_pozyx();
   pwr_manager_set_power_pozyx(req->state);
+}
+
+void led_strip_set_callback(const void *led_strip_set_req, void *led_strip_set_res) {
+  // Cast messages to expected types
+  mobi_interfaces__srv__SetLedStrip_Request *req = (mobi_interfaces__srv__SetLedStrip_Request *)led_strip_set_req;
+  mobi_interfaces__srv__SetLedStrip_Response *res = (mobi_interfaces__srv__SetLedStrip_Response *)led_strip_set_res;
+
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Updating LED Strip.");
+
+  res->success = true;
+
+  // Turn off led strip
+  if (req->type == mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_OFF) {
+    led_strip_stop_animation(&led_strip);
+    pwr_manager_set_power_led(false);
+    res->message = micro_ros_string_utilities_init("Turned led strip off.");
+    return;
+  }
+
+  pwr_manager_set_power_led(true);
+
+  // Set default color
+  mobi_interfaces__msg__ColorRGBW color =
+    mobi_interfaces__msg__ColorRGBW__are_equal(&req->color,
+                                               &(mobi_interfaces__msg__ColorRGBW){.r = 0, .g = 0, .b = 0, .w = 0})
+      ? (mobi_interfaces__msg__ColorRGBW){.r = 255, .g = 255, .b = 0, .w = 0}
+      : req->color;
+
+  // Change animation
+  if (req->type == mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_ON) {
+    led_strip_clear();
+    led_strip_fill_rgbw(&req->color);
+    led_strip_update();
+
+  } else if (req->type == mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_DRIVING_LIGHTS) {
+    led_strip_clear();
+    led_strip_driving_light();
+
+  } else if (req->type == mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_BEACON) {
+    uint8_t frame_count = req->frame_count != 0 ? req->frame_count : NUM_PIXELS;
+    uint8_t update_rate = req->update_rate != 0 ? req->update_rate : 5;
+    uint8_t line_length = req->line_length != 0 ? req->line_length : 4;
+    uint8_t line_count = req->line_count != 0 ? req->line_count : 4;
+
+    led_strip_beacon_rgbw(&led_strip, &color, update_rate, frame_count, line_length, line_count, req->rotate_left);
+
+  } else if (req->type == mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_BLINK) {
+    uint8_t update_rate = req->update_rate != 0 ? req->update_rate : 50;
+    uint8_t line_length = req->line_length != 0 ? req->line_length : NUM_PIXELS;
+    uint8_t line_count = req->line_count != 0 ? req->line_count : 1;
+
+    led_strip_blink(&led_strip, &color, update_rate, line_length, line_count);
+
+  } else if (req->type == mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_FILL) {
+    led_strip_fill(&led_strip, &color, 1, NUM_PIXELS * 2);
+  }
+
+  res->message = micro_ros_string_utilities_init("Updated LED Strip.");
 }
 
 void cmd_vel_callback(const void *msgin) {
