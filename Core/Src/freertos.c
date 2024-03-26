@@ -378,8 +378,12 @@ void start_ros_task(void *argument) {
 
     // Boot into bootloader if flag is set.
     // Note: The flag gets set by the service /boot_bootloader
-    if (should_jump_to_bootloader)
+    if (should_jump_to_bootloader) {
+      pwr_manager_set_power_led(true);
+      led_strip_power_on_animation(&led_strip, &(mobi_interfaces__msg__ColorRGBW){.r = 255, .g = 0, .b = 100, .w = 0});
+      osDelay(1800);
       jump_to_bootloader();
+    }
 
     rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
 
