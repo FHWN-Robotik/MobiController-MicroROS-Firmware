@@ -16,6 +16,9 @@
 #include "stdbool.h"
 #include "stm32l4xx.h"
 
+#define BAT_MIN_VOLTAGE 11.1
+#define BAT_MAX_VOLTAGE 13.0
+
 typedef struct pwr_manager_s {
   ADC_HandleTypeDef *adc;
 
@@ -23,6 +26,8 @@ typedef struct pwr_manager_s {
 
   uint32_t adc_res;
   float battery_voltage;
+  float charge_percentage;
+
   bool is_battery_connected;
 } pwr_manager_t;
 

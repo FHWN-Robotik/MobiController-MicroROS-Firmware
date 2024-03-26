@@ -111,12 +111,12 @@ sensor_msgs__msg__BatteryState battery_state_msg = {
   .power_supply_health = sensor_msgs__msg__BatteryState__POWER_SUPPLY_HEALTH_UNKNOWN,
   .design_capacity = 10.4,
   .present = true,
+  .percentage = 1,
 
   .temperature = NAN,
   .current = NAN,
   .charge = NAN,
   .capacity = NAN,
-  .percentage = NAN,
 };
 mobi_interfaces__msg__UltraRanges ultra_ranges_msg; // This will be initialized in "start_ros_task"
 
@@ -421,8 +421,15 @@ void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time) {
   pwr_manager_check_for_battery_warning(&pwr_manager);
   battery_state_msg.voltage = pwr_manager.battery_voltage;
   battery_state_msg.present = pwr_manager.is_battery_connected;
+  battery_state_msg.percentage = pwr_manager.charge_percentage;
   stamp_header(&battery_state_msg.header.stamp);
   RCCHECK(rcl_publish(&battery_state_pub, &battery_state_msg, NULL));
+
+  if (pwr_manager.battery_warning_triggerd) {
+    pwr_manager_set_power_led(true);
+    led_strip_battery_warning_light(&led_strip);
+    canlib_send_stop(&can);
+  }
 }
 
 void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
@@ -558,6 +565,13 @@ void led_strip_set_callback(const void *led_strip_set_req, void *led_strip_set_r
   mobi_interfaces__srv__SetLedStrip_Request *req = (mobi_interfaces__srv__SetLedStrip_Request *)led_strip_set_req;
   mobi_interfaces__srv__SetLedStrip_Response *res = (mobi_interfaces__srv__SetLedStrip_Response *)led_strip_set_res;
 
+  if (pwr_manager.battery_warning_triggerd) {
+    RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Trying to update the LED Strip, but battery is empty!");
+    res->message = micro_ros_string_utilities_init("Battery is empty!");
+    res->success = false;
+    return;
+  }
+
   RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Updating LED Strip.");
 
   res->success = true;
@@ -612,6 +626,11 @@ void led_strip_set_callback(const void *led_strip_set_req, void *led_strip_set_r
 }
 
 void cmd_vel_callback(const void *msgin) {
+  if (pwr_manager.battery_warning_triggerd) {
+    RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Trying to drive, but can't! Battery is emtpy.");
+    return;
+  }
+
   // Cast received message to used type
   const geometry_msgs__msg__Twist *msg = (const geometry_msgs__msg__Twist *)msgin;
 

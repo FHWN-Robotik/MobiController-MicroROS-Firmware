@@ -19,6 +19,7 @@ void pwr_manager_init(pwr_manager_t *pwr_manager, ADC_HandleTypeDef *hadc) {
   pwr_manager->battery_voltage = 0;
   pwr_manager->battery_warning_triggerd = false;
   pwr_manager->is_battery_connected = true; // Assume a battery is connected.
+  pwr_manager->charge_percentage = 1;
 
   HAL_ADCEx_Calibration_Start(hadc, ADC_SINGLE_ENDED);
 
@@ -55,6 +56,7 @@ void pwr_manager_check_for_battery_warning(pwr_manager_t *pwr_manager) {
     if (pwr_manager->is_battery_connected) {
       RCUTILS_LOG_WARN_NAMED(LOGGER_NAME, "There is no battery connected, ignoring low battery voltage.");
       pwr_manager->is_battery_connected = false;
+      pwr_manager->battery_warning_triggerd = false;
     }
     return;
   }
@@ -66,8 +68,11 @@ void pwr_manager_check_for_battery_warning(pwr_manager_t *pwr_manager) {
   }
 
   // Check if the battery voltage is bellow 11 V
-  if (pwr_manager->battery_voltage <= 11.1) {
-    pwr_manager->battery_warning_triggerd = true;
+  if (pwr_manager->battery_voltage <= BAT_MIN_VOLTAGE) {
+    if (!pwr_manager->battery_warning_triggerd) {
+      RCUTILS_LOG_WARN_NAMED(LOGGER_NAME, "Battery is empty!");
+      pwr_manager->battery_warning_triggerd = true;
+    }
     return;
   }
 }
