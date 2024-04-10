@@ -23,7 +23,7 @@ void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c) {
 }
 
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-  if (hi2c == imu.i2c_handle && hi2c->Devaddress == imu.device_address) {
+  if (hi2c == imu.i2c_handle) {
     bno055_read_DMA_complete(&imu);
   }
 }
