@@ -144,7 +144,7 @@
         "USE_FULL_ASSERT",
         "USE_HAL_DRIVER"
       ],
-      "compilerPath": "/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/12.2.1-1.2.1/.content/bin/arm-none-eabi-gcc"
+      "compilerPath": "/nix/store/h7prigvdx25mfvhnajvk13cqlxq35al8-gcc-arm-embedded-12.3.rel1/bin/arm-none-eabi-gcc"
     }
   ],
   "version": 4
