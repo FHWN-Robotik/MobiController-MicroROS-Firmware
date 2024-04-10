@@ -41,6 +41,7 @@ extern I2C_HandleTypeDef hi2c1;
 void MX_I2C1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+void i2c_check_status(I2C_HandleTypeDef *hi2c, HAL_StatusTypeDef status);
 
 /* USER CODE END Prototypes */
 

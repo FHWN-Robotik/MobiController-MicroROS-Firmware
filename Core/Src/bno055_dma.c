@@ -16,64 +16,6 @@
 #include "stdio.h"
 #include "utils.h"
 
-void check_status(BNO055_t *imu, HAL_StatusTypeDef status) {
-  if (status == HAL_OK) {
-    return;
-  }
-
-  if (status == HAL_ERROR) {
-    printf("HAL_I2C_Master_Transmit HAL_ERROR\r\n");
-  } else if (status == HAL_TIMEOUT) {
-    printf("HAL_I2C_Master_Transmit HAL_TIMEOUT\r\n");
-  } else if (status == HAL_BUSY) {
-    printf("HAL_I2C_Master_Transmit HAL_BUSY\r\n");
-  } else {
-    printf("Unknown status data %d", status);
-  }
-
-  uint32_t error = HAL_I2C_GetError(imu->i2c_handle);
-  if (error == HAL_I2C_ERROR_NONE) {
-    return;
-  } else if (error == HAL_I2C_ERROR_BERR) {
-    printf("HAL_I2C_ERROR_BERR\r\n");
-  } else if (error == HAL_I2C_ERROR_ARLO) {
-    printf("HAL_I2C_ERROR_ARLO\r\n");
-  } else if (error == HAL_I2C_ERROR_AF) {
-    printf("HAL_I2C_ERROR_AF\r\n");
-  } else if (error == HAL_I2C_ERROR_OVR) {
-    printf("HAL_I2C_ERROR_OVR\r\n");
-  } else if (error == HAL_I2C_ERROR_DMA) {
-    printf("HAL_I2C_ERROR_DMA\r\n");
-  } else if (error == HAL_I2C_ERROR_TIMEOUT) {
-    printf("HAL_I2C_ERROR_TIMEOUT\r\n");
-  }
-
-  HAL_I2C_StateTypeDef state = HAL_I2C_GetState(imu->i2c_handle);
-  if (state == HAL_I2C_STATE_RESET) {
-    printf("HAL_I2C_STATE_RESET\r\n");
-  } else if (state == HAL_I2C_STATE_READY) {
-    printf("HAL_I2C_STATE_RESET\r\n");
-  } else if (state == HAL_I2C_STATE_BUSY) {
-    printf("HAL_I2C_STATE_BUSY\r\n");
-  } else if (state == HAL_I2C_STATE_BUSY_TX) {
-    printf("HAL_I2C_STATE_BUSY_TX\r\n");
-  } else if (state == HAL_I2C_STATE_BUSY_RX) {
-    printf("HAL_I2C_STATE_BUSY_RX\r\n");
-  } else if (state == HAL_I2C_STATE_LISTEN) {
-    printf("HAL_I2C_STATE_LISTEN\r\n");
-  } else if (state == HAL_I2C_STATE_BUSY_TX_LISTEN) {
-    printf("HAL_I2C_STATE_BUSY_TX_LISTEN\r\n");
-  } else if (state == HAL_I2C_STATE_BUSY_RX_LISTEN) {
-    printf("HAL_I2C_STATE_BUSY_RX_LISTEN\r\n");
-  } else if (state == HAL_I2C_STATE_ABORT) {
-    printf("HAL_I2C_STATE_ABORT\r\n");
-  } else if (state == HAL_I2C_STATE_TIMEOUT) {
-    printf("HAL_I2C_STATE_TIMEOUT\r\n");
-  } else if (state == HAL_I2C_STATE_ERROR) {
-    printf("HAL_I2C_STATE_ERROR\r\n");
-  }
-}
-
 void transform_vec(uint8_t buf[8], bno055_vector_t *vec, double scale, bool is_quaternion) {
   if (is_quaternion) {
     vec->w = (int16_t)((buf[1] << 8) | buf[0]) / scale;
@@ -134,7 +76,7 @@ void bno055_write_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t data) {
 
   HAL_StatusTypeDef status =
     HAL_I2C_Master_Transmit_DMA(imu->i2c_handle, imu->device_address << 1, imu->tx_buf, sizeof(imu->tx_buf));
-  check_status(imu, status);
+  i2c_check_status(imu->i2c_handle, status);
 }
 
 void bno055_read_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t len) {
@@ -148,7 +90,7 @@ void bno055_read_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t len) {
 
   HAL_StatusTypeDef status =
     HAL_I2C_Master_Receive_DMA(imu->i2c_handle, imu->device_address << 1, (uint8_t *)imu->rx_buf, len);
-  check_status(imu, status);
+  i2c_check_status(imu->i2c_handle, status);
 }
 
 void bno055_read_DMA_complete(BNO055_t *imu) {
