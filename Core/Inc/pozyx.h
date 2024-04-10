@@ -3,6 +3,7 @@
 
 #include "geometry_msgs/msg/point.h"
 #include "geometry_msgs/msg/quaternion.h"
+#include "mobi_interfaces/srv/get_calib_status.h"
 #include "pozyx_definitions.h"
 #include "stm32l4xx.h"
 
@@ -27,6 +28,8 @@ typedef struct pozyx_s {
   uint8_t firmware_version;
   uint8_t hardware_version;
 
+  mobi_interfaces__srv__GetCalibStatus_Response *calib_status;
+
 } pozyx_t;
 
 void pozyx_init(pozyx_t *pozyx, I2C_HandleTypeDef *hi2c_device, uint16_t device_address);
@@ -40,5 +43,7 @@ void pozyx_read_who_am_i(pozyx_t *pozyx);
 void pozyx_read_firmware_version(pozyx_t *pozyx);
 void pozyx_read_harware_version(pozyx_t *pozyx);
 void pozyx_read_network_id(pozyx_t *pozyx);
+
+void pozyx_read_calibration_state(pozyx_t *pozyx);
 
 #endif /* __POZYX_H__ */

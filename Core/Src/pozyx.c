@@ -3,6 +3,7 @@
 #include "geometry_msgs/msg/point.h"
 #include "geometry_msgs/msg/quaternion.h"
 #include "i2c.h"
+#include "mobi_interfaces/srv/get_calib_status.h"
 #include "rcutils/logging_macros.h"
 
 void pozyx_init(pozyx_t *pozyx, I2C_HandleTypeDef *hi2c_device, uint16_t device_address) {
@@ -14,6 +15,7 @@ void pozyx_init(pozyx_t *pozyx, I2C_HandleTypeDef *hi2c_device, uint16_t device_
     RCUTILS_LOG_ERROR_NAMED(LOGGER_NAME, "Error setting up Pozyx!");
   }
 
+  pozyx->calib_status = mobi_interfaces__srv__GetCalibStatus_Response__create();
   pozyx->orientation = geometry_msgs__msg__Quaternion__create();
   pozyx->position = geometry_msgs__msg__Point__create();
 }
@@ -63,6 +65,14 @@ void pozyx_read_DMA_complete(pozyx_t *pozyx) {
     break;
   }
 
+  case POZYX_CALIB_STATUS: {
+    pozyx->calib_status->system = (pozyx->rx_buf[0] >> 6) & 0x03;
+    pozyx->calib_status->gyro = (pozyx->rx_buf[0] >> 4) & 0x03;
+    pozyx->calib_status->accel = (pozyx->rx_buf[0] >> 2) & 0x03;
+    pozyx->calib_status->mag = pozyx->rx_buf[0] & 0x03;
+    break;
+  }
+
   default:
     break;
   }
@@ -88,4 +98,9 @@ void pozyx_read_harware_version(pozyx_t *pozyx) {
 void pozyx_read_network_id(pozyx_t *pozyx) {
   pozyx->reading_device = POZYX_NETWORK_ID;
   pozyx_mem_read_DMA(pozyx, POZYX_NETWORK_ID, 2);
+}
+
+void pozyx_read_calibration_state(pozyx_t *pozyx) {
+  pozyx->reading_device = POZYX_CALIB_STATUS;
+  pozyx_mem_read_DMA(pozyx, POZYX_CALIB_STATUS, 1);
 }

@@ -165,6 +165,7 @@ void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_s
 void boot_bootlaoder_callback(const void *boot_bootlaoder_req, void *boot_bootlaoder_res);
 void pozyx_set_pwr_callback(const void *pozyx_set_pwr_req, void *pozyx_set_pwr_res);
 void pozyx_get_info_callback(const void *pozyx_get_info_req, void *pozyx_get_info_res);
+void pozyx_get_calib_status_callback(const void *pozyx_get_calib_status_req, void *pozyx_get_calib_status_res);
 void led_strip_set_callback(const void *led_strip_set_req, void *led_strip_set_res);
 void cmd_vel_callback(const void *msgin);
 /* USER CODE END FunctionPrototypes */
@@ -276,6 +277,10 @@ void start_ros_task(void *argument) {
   mobi_interfaces__srv__GetPozyxInfo_Request pozyx_get_info_req;
   mobi_interfaces__srv__GetPozyxInfo_Response pozyx_get_info_res;
 
+  rcl_service_t pozyx_get_calib_status_srv = rcl_get_zero_initialized_service();
+  mobi_interfaces__srv__GetCalibStatus_Request pozyx_get_calib_status_req;
+  mobi_interfaces__srv__GetCalibStatus_Response pozyx_get_calib_status_res;
+
   rcl_service_t led_strip_set_srv = rcl_get_zero_initialized_service();
   mobi_interfaces__srv__SetLedStrip_Request led_strip_set_req;
   mobi_interfaces__srv__SetLedStrip_Response led_strip_set_res;
@@ -344,6 +349,9 @@ void start_ros_task(void *argument) {
                                     ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetPower), "/pozyx_set_power"));
   RCCHECK(rclc_service_init_default(
     &pozyx_get_info_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetPozyxInfo), "/pozyx_get_info"));
+  RCCHECK(rclc_service_init_default(&pozyx_get_calib_status_srv, &node,
+                                    ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetCalibStatus),
+                                    "/pozyx_get_calib_status"));
   RCCHECK(rclc_service_init_default(&led_strip_set_srv, &node,
                                     ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetLedStrip), "/led_strip_set"));
 
@@ -359,7 +367,7 @@ void start_ros_task(void *argument) {
 
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 11, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 12, &allocator));
 
   // Add Timers to executor
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
@@ -382,6 +390,8 @@ void start_ros_task(void *argument) {
                                     pozyx_set_pwr_callback));
   RCCHECK(rclc_executor_add_service(&executor, &pozyx_get_info_srv, &pozyx_get_info_req, &pozyx_get_info_res,
                                     pozyx_get_info_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &pozyx_get_calib_status_srv, &pozyx_get_calib_status_req,
+                                    &pozyx_get_calib_status_res, pozyx_get_calib_status_callback));
   RCCHECK(rclc_executor_add_service(&executor, &led_strip_set_srv, &led_strip_set_req, &led_strip_set_res,
                                     led_strip_set_callback));
 
@@ -624,6 +634,34 @@ void pozyx_get_info_callback(const void *pozyx_get_info_req, void *pozyx_get_inf
   res->firmware_version = pozyx.firmware_version;
   res->harware_version = pozyx.hardware_version;
   res->network_id = pozyx.network_id;
+}
+
+void pozyx_get_calib_status_callback(const void *pozyx_get_calib_status_req, void *pozyx_get_calib_status_res) {
+  // Cast messages to expected types
+  // mobi_interfaces__srv__GetImuCalibStatus_Request *req =
+  //     (mobi_interfaces__srv__GetImuCalibStatus_Request *)imu_get_calib_status_req;
+  mobi_interfaces__srv__GetCalibStatus_Response *res =
+    (mobi_interfaces__srv__GetCalibStatus_Response *)pozyx_get_calib_status_res;
+
+  if (!pwr_manager_get_power_pozyx()) {
+    RCUTILS_LOG_WARN_NAMED(LOGGER_NAME, "Trying to read pozyx calibration data, but it is not turned on!");
+    res->accel = 0;
+    res->gyro = 0;
+    res->mag = 0;
+    res->system = 0;
+    return;
+  }
+
+  // Handle request message and set the response message values
+  RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client requested Pozyx calibration status.");
+
+  while (pozyx.hi2c->State != HAL_I2C_STATE_READY) {
+  }
+  pozyx_read_calibration_state(&pozyx);
+  while (pozyx.hi2c->State != HAL_I2C_STATE_READY) {
+  }
+
+  mobi_interfaces__srv__GetCalibStatus_Response__copy(pozyx.calib_status, res);
 }
 
 void led_strip_set_callback(const void *led_strip_set_req, void *led_strip_set_res) {
