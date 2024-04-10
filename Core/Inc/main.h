@@ -36,6 +36,7 @@ extern "C" {
 #include "hcsr04.h"
 #include "led_strip.h"
 #include "power_manager.h"
+#include "pozyx.h"
 
 /* USER CODE END Includes */
 
@@ -59,6 +60,8 @@ extern struct hcsr04_s ultra_6;
 extern struct pwr_manager_s pwr_manager;
 
 extern struct led_strip_s led_strip;
+
+extern struct pozyx_s pozyx;
 
 /* USER CODE END ET */
 

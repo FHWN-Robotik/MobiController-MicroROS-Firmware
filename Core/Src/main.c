@@ -36,6 +36,7 @@
 #include "encoder.h"
 #include "hcsr04.h"
 #include "led_strip.h"
+#include "pozyx.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -76,6 +77,8 @@ pwr_manager_t pwr_manager = {
 };
 
 led_strip_t led_strip;
+
+pozyx_t pozyx;
 
 /* USER CODE END PV */
 

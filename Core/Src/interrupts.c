@@ -11,6 +11,7 @@
 #include "hcsr04.h"
 #include "i2c.h"
 #include "main.h"
+#include "pozyx.h"
 #include "stm32l4xx.h"
 
 /*
@@ -22,11 +23,15 @@ void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c) {
 }
 
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-  if (hi2c != imu.i2c_handle) {
-    return;
+  if (hi2c == imu.i2c_handle && hi2c->Devaddress == imu.device_address) {
+    bno055_read_DMA_complete(&imu);
   }
+}
 
-  bno055_read_DMA_complete(&imu);
+void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
+  if (hi2c == pozyx.hi2c) {
+    pozyx_read_DMA_complete(&pozyx);
+  }
 }
 
 /*

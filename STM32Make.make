@@ -52,6 +52,7 @@ Core/Src/interrupts.c \
 Core/Src/led_strip.c \
 Core/Src/main.c \
 Core/Src/power_manager.c \
+Core/Src/pozyx.c \
 Core/Src/stm32l4xx_hal_msp.c \
 Core/Src/stm32l4xx_hal_timebase_tim.c \
 Core/Src/stm32l4xx_it.c \
@@ -125,7 +126,7 @@ PREFIX = arm-none-eabi-
 POSTFIX = "
 # The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
 # either it can be added to the PATH environment variable.
-GCC_PATH="/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/12.2.1-1.2.1/.content/bin
+GCC_PATH="/nix/store/h7prigvdx25mfvhnajvk13cqlxq35al8-gcc-arm-embedded-12.3.rel1/bin
 ifdef GCC_PATH
 CXX = $(GCC_PATH)/$(PREFIX)g++$(POSTFIX)
 CC = $(GCC_PATH)/$(PREFIX)gcc$(POSTFIX)
@@ -409,13 +410,13 @@ $(BUILD_DIR):
 # flash
 #######################################
 flash: $(BUILD_DIR)/$(TARGET).elf
-	"/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-1.1/.content/bin/openocd" -f ./openocd.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
+	"/nix/store/40ika5hf2zhqk2xaa8jg254276fhn1z4-openocd-0.12.0/bin/openocd" -f ./openocd.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
 
 #######################################
 # erase
 #######################################
 erase: $(BUILD_DIR)/$(TARGET).elf
-	"/home/florian/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-1.1/.content/bin/openocd" -f ./openocd.cfg -c "init; reset halt; stm32l4x mass_erase 0; exit"
+	"/nix/store/40ika5hf2zhqk2xaa8jg254276fhn1z4-openocd-0.12.0/bin/openocd" -f ./openocd.cfg -c "init; reset halt; stm32l4x mass_erase 0; exit"
 
 #######################################
 # clean up

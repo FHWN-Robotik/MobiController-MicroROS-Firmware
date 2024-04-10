@@ -25,6 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <geometry_msgs/msg/pose_stamped.h>
 #include <geometry_msgs/msg/twist.h>
 #include <math.h>
 #include <micro_ros_utilities/string_utilities.h>
@@ -32,6 +33,7 @@
 #include <mobi_interfaces/msg/ultra_ranges.h>
 #include <mobi_interfaces/srv/get_imu_calib_data.h>
 #include <mobi_interfaces/srv/get_imu_calib_status.h>
+#include <mobi_interfaces/srv/get_pozyx_info.h>
 #include <mobi_interfaces/srv/set_imu_calib_data.h>
 #include <mobi_interfaces/srv/set_led_strip.h>
 #include <mobi_interfaces/srv/set_power.h>
@@ -93,6 +95,7 @@ rcl_publisher_t imu_pup;
 rcl_publisher_t encoders_pup;
 rcl_publisher_t battery_state_pub;
 rcl_publisher_t ultra_ranges_pup;
+rcl_publisher_t pozyx_pup;
 
 // Publisher msgs
 std_msgs__msg__Bool msg_button;
@@ -119,6 +122,7 @@ sensor_msgs__msg__BatteryState battery_state_msg = {
   .capacity = NAN,
 };
 mobi_interfaces__msg__UltraRanges ultra_ranges_msg; // This will be initialized in "start_ros_task"
+geometry_msgs__msg__PoseStamped pozyx_msg;
 
 // Subscribers
 rcl_subscription_t cmd_vel_sub;
@@ -160,6 +164,7 @@ void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_g
 void imu_set_calib_data_callback(const void *imu_set_calib_data_req, void *imu_set_calib_data_res);
 void boot_bootlaoder_callback(const void *boot_bootlaoder_req, void *boot_bootlaoder_res);
 void pozyx_set_pwr_callback(const void *pozyx_set_pwr_req, void *pozyx_set_pwr_res);
+void pozyx_get_info_callback(const void *pozyx_get_info_req, void *pozyx_get_info_res);
 void led_strip_set_callback(const void *led_strip_set_req, void *led_strip_set_res);
 void cmd_vel_callback(const void *msgin);
 /* USER CODE END FunctionPrototypes */
@@ -267,6 +272,10 @@ void start_ros_task(void *argument) {
   mobi_interfaces__srv__SetPower_Request pozyx_set_pwr_req;
   mobi_interfaces__srv__SetPower_Response pozyx_set_pwr_res;
 
+  rcl_service_t pozyx_get_info_srv = rcl_get_zero_initialized_service();
+  mobi_interfaces__srv__GetPozyxInfo_Request pozyx_get_info_req;
+  mobi_interfaces__srv__GetPozyxInfo_Response pozyx_get_info_res;
+
   rcl_service_t led_strip_set_srv = rcl_get_zero_initialized_service();
   mobi_interfaces__srv__SetLedStrip_Request led_strip_set_req;
   mobi_interfaces__srv__SetLedStrip_Response led_strip_set_res;
@@ -312,6 +321,8 @@ void start_ros_task(void *argument) {
                                       ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, BatteryState), "/battery_state"));
   RCCHECK(rclc_publisher_init_default(&ultra_ranges_pup, &node,
                                       ROSIDL_GET_MSG_TYPE_SUPPORT(mobi_interfaces, msg, UltraRanges), "/ultra_ranges"));
+  RCCHECK(rclc_publisher_init_default(&pozyx_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, PoseStamped),
+                                      "/pozyx"));
 
   // create subsribers
   RCCHECK(rclc_subscription_init_default(&cmd_vel_sub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
@@ -331,6 +342,8 @@ void start_ros_task(void *argument) {
                                     "/boot_bootloader"));
   RCCHECK(rclc_service_init_default(&pozyx_set_pwr_srv, &node,
                                     ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetPower), "/pozyx_set_power"));
+  RCCHECK(rclc_service_init_default(
+    &pozyx_get_info_srv, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetPozyxInfo), "/pozyx_get_info"));
   RCCHECK(rclc_service_init_default(&led_strip_set_srv, &node,
                                     ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, SetLedStrip), "/led_strip_set"));
 
@@ -346,7 +359,7 @@ void start_ros_task(void *argument) {
 
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 10, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 11, &allocator));
 
   // Add Timers to executor
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
@@ -367,6 +380,8 @@ void start_ros_task(void *argument) {
                                     boot_bootlaoder_callback));
   RCCHECK(rclc_executor_add_service(&executor, &pozyx_set_pwr_srv, &pozyx_set_pwr_req, &pozyx_set_pwr_res,
                                     pozyx_set_pwr_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &pozyx_get_info_srv, &pozyx_get_info_req, &pozyx_get_info_res,
+                                    pozyx_get_info_callback));
   RCCHECK(rclc_executor_add_service(&executor, &led_strip_set_srv, &led_strip_set_req, &led_strip_set_res,
                                     led_strip_set_callback));
 
@@ -558,6 +573,57 @@ void pozyx_set_pwr_callback(const void *pozyx_set_pwr_req, void *pozyx_set_pwr_r
 
   res->old_state = pwr_manager_get_power_pozyx();
   pwr_manager_set_power_pozyx(req->state);
+
+  if (!req->state) {
+    RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Turning off pozyx.");
+    return;
+  }
+
+  if (!res->old_state) {
+    RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Turning on pozyx.");
+    osDelay(500);
+    pozyx_init(&pozyx, &hi2c1, POZYX_I2C_ADDRESS);
+  }
+}
+
+void pozyx_get_info_callback(const void *pozyx_get_info_req, void *pozyx_get_info_res) {
+  // Cast messages to expected types
+  mobi_interfaces__srv__GetPozyxInfo_Request *req = (mobi_interfaces__srv__GetPozyxInfo_Request *)pozyx_get_info_req;
+  mobi_interfaces__srv__GetPozyxInfo_Response *res = (mobi_interfaces__srv__GetPozyxInfo_Response *)pozyx_get_info_res;
+
+  if (!pwr_manager_get_power_pozyx()) {
+    RCUTILS_LOG_WARN_NAMED(LOGGER_NAME, "Trying to read pozyx, but it is not turned on!");
+
+    res->who_am_i = 0;
+    res->firmware_version = 0;
+    res->harware_version = 0;
+    res->network_id = 0;
+    return;
+  }
+
+  while (pozyx.hi2c->State != HAL_I2C_STATE_READY) {
+  }
+  pozyx_read_who_am_i(&pozyx);
+
+  while (pozyx.hi2c->State != HAL_I2C_STATE_READY) {
+  }
+  pozyx_read_firmware_version(&pozyx);
+
+  while (pozyx.hi2c->State != HAL_I2C_STATE_READY) {
+  }
+  pozyx_read_harware_version(&pozyx);
+
+  while (pozyx.hi2c->State != HAL_I2C_STATE_READY) {
+  }
+  pozyx_read_network_id(&pozyx);
+
+  while (pozyx.reading_device != -1 && pozyx.hi2c->State != HAL_I2C_STATE_READY) {
+  }
+
+  res->who_am_i = pozyx.who_am_i;
+  res->firmware_version = pozyx.firmware_version;
+  res->harware_version = pozyx.hardware_version;
+  res->network_id = pozyx.network_id;
 }
 
 void led_strip_set_callback(const void *led_strip_set_req, void *led_strip_set_res) {
