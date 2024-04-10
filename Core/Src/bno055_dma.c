@@ -52,7 +52,7 @@ void bno055_init(BNO055_t *imu, I2C_HandleTypeDef *hi2c_device, uint16_t device_
 
   imu->test = 0xffff;
 
-  imu->calib_status = mobi_interfaces__srv__GetImuCalibStatus_Response__create();
+  imu->calib_status = mobi_interfaces__srv__GetCalibStatus_Response__create();
   imu->calib_data = mobi_interfaces__srv__GetImuCalibData_Response__create();
 
   bno055_write_DMA(imu, BNO055_SYS_TRIGGER, 0x20); // reset imu

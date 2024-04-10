@@ -31,8 +31,8 @@
 #include <micro_ros_utilities/string_utilities.h>
 #include <mobi_interfaces/msg/encoders_stamped.h>
 #include <mobi_interfaces/msg/ultra_ranges.h>
+#include <mobi_interfaces/srv/get_calib_status.h>
 #include <mobi_interfaces/srv/get_imu_calib_data.h>
-#include <mobi_interfaces/srv/get_imu_calib_status.h>
 #include <mobi_interfaces/srv/get_pozyx_info.h>
 #include <mobi_interfaces/srv/set_imu_calib_data.h>
 #include <mobi_interfaces/srv/set_led_strip.h>
@@ -253,8 +253,8 @@ void start_ros_task(void *argument) {
 
   // Services
   rcl_service_t imu_get_calib_status_srv = rcl_get_zero_initialized_service();
-  mobi_interfaces__srv__GetImuCalibStatus_Request imu_get_calib_status_req;
-  mobi_interfaces__srv__GetImuCalibStatus_Response imu_get_calib_status_res;
+  mobi_interfaces__srv__GetCalibStatus_Request imu_get_calib_status_req;
+  mobi_interfaces__srv__GetCalibStatus_Response imu_get_calib_status_res;
 
   rcl_service_t imu_get_calib_data_srv = rcl_get_zero_initialized_service();
   mobi_interfaces__srv__GetImuCalibData_Request imu_get_calib_data_req;
@@ -330,7 +330,7 @@ void start_ros_task(void *argument) {
 
   // Initialize Services
   RCCHECK(rclc_service_init_default(&imu_get_calib_status_srv, &node,
-                                    ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibStatus),
+                                    ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetCalibStatus),
                                     "/imu_get_calib_status"));
   RCCHECK(rclc_service_init_default(&imu_get_calib_data_srv, &node,
                                     ROSIDL_GET_SRV_TYPE_SUPPORT(mobi_interfaces, srv, GetImuCalibData),
@@ -510,8 +510,8 @@ void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *i
   // Cast messages to expected types
   // mobi_interfaces__srv__GetImuCalibStatus_Request *req =
   //     (mobi_interfaces__srv__GetImuCalibStatus_Request *)imu_get_calib_status_req;
-  mobi_interfaces__srv__GetImuCalibStatus_Response *res =
-    (mobi_interfaces__srv__GetImuCalibStatus_Response *)imu_get_calib_status_res;
+  mobi_interfaces__srv__GetCalibStatus_Response *res =
+    (mobi_interfaces__srv__GetCalibStatus_Response *)imu_get_calib_status_res;
 
   // Handle request message and set the response message values
   RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client requested IMU calibration status.");
@@ -520,7 +520,7 @@ void imu_get_calib_status_callback(const void *imu_get_calib_status_req, void *i
   while (!imu.reading_device == BNO055_DEVICE_NONE) {
   }
 
-  mobi_interfaces__srv__GetImuCalibStatus_Response__copy(imu.calib_status, res);
+  mobi_interfaces__srv__GetCalibStatus_Response__copy(imu.calib_status, res);
 }
 
 void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_get_calib_data_res) {
