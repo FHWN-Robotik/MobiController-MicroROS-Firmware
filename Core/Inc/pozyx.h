@@ -27,8 +27,7 @@ typedef struct pozyx_s {
   uint16_t network_id;
   uint8_t firmware_version;
   uint8_t hardware_version;
-
-  mobi_interfaces__srv__GetCalibStatus_Response *calib_status;
+  uint8_t calib_status;
 
 } pozyx_t;
 

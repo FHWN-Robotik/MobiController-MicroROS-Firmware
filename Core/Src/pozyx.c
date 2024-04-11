@@ -15,9 +15,14 @@ void pozyx_init(pozyx_t *pozyx, I2C_HandleTypeDef *hi2c_device, uint16_t device_
     RCUTILS_LOG_ERROR_NAMED(LOGGER_NAME, "Error setting up Pozyx!");
   }
 
-  pozyx->calib_status = mobi_interfaces__srv__GetCalibStatus_Response__create();
   pozyx->orientation = geometry_msgs__msg__Quaternion__create();
   pozyx->position = geometry_msgs__msg__Point__create();
+
+  pozyx->who_am_i = 0;
+  pozyx->network_id = 0;
+  pozyx->firmware_version = 0;
+  pozyx->hardware_version = 0;
+  pozyx->calib_status = 0;
 }
 
 void pozyx_write_DMA(pozyx_t *pozyx, uint8_t reg_addr, uint8_t data) {
@@ -66,10 +71,7 @@ void pozyx_read_DMA_complete(pozyx_t *pozyx) {
   }
 
   case POZYX_CALIB_STATUS: {
-    pozyx->calib_status->system = (pozyx->rx_buf[0] >> 6) & 0x03;
-    pozyx->calib_status->gyro = (pozyx->rx_buf[0] >> 4) & 0x03;
-    pozyx->calib_status->accel = (pozyx->rx_buf[0] >> 2) & 0x03;
-    pozyx->calib_status->mag = pozyx->rx_buf[0] & 0x03;
+    pozyx->calib_status = pozyx->rx_buf[0];
     break;
   }
 

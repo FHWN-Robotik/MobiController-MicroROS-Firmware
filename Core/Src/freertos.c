@@ -661,7 +661,10 @@ void pozyx_get_calib_status_callback(const void *pozyx_get_calib_status_req, voi
   while (pozyx.hi2c->State != HAL_I2C_STATE_READY) {
   }
 
-  mobi_interfaces__srv__GetCalibStatus_Response__copy(pozyx.calib_status, res);
+  res->system = (pozyx.calib_status >> 6) & 0x03;
+  res->gyro = (pozyx.calib_status >> 4) & 0x03;
+  res->accel = (pozyx.calib_status >> 2) & 0x03;
+  res->mag = pozyx.calib_status & 0x03;
 }
 
 void led_strip_set_callback(const void *led_strip_set_req, void *led_strip_set_res) {
