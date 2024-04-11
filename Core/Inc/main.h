@@ -88,6 +88,9 @@ void Error_Handler(void);
 #define B1_EXTI_IRQn EXTI15_10_IRQn
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOH
+#define POZYX_INT1_Pin GPIO_PIN_0
+#define POZYX_INT1_GPIO_Port GPIOC
+#define POZYX_INT1_EXTI_IRQn EXTI0_IRQn
 #define ONOFF_LED_STRIP_Pin GPIO_PIN_1
 #define ONOFF_LED_STRIP_GPIO_Port GPIOC
 #define US_TRIG_6_Pin GPIO_PIN_2
@@ -125,6 +128,9 @@ void Error_Handler(void);
 #define US_ECHO_5_GPIO_Port GPIOB
 #define LD4_Pin GPIO_PIN_13
 #define LD4_GPIO_Port GPIOB
+#define POZYX_INT2_Pin GPIO_PIN_14
+#define POZYX_INT2_GPIO_Port GPIOB
+#define POZYX_INT2_EXTI_IRQn EXTI15_10_IRQn
 #define ENCODER_3_A_Pin GPIO_PIN_15
 #define ENCODER_3_A_GPIO_Port GPIOB
 #define ENCODER_3_A_EXTI_IRQn EXTI15_10_IRQn
