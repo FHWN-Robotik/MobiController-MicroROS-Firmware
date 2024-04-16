@@ -1,3 +1,13 @@
+/*
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ * File: pozyx.h
+ * Created Date: Tuesday, March 26th 2024, 1:25:33 pm
+ * Author: Florian
+ * Description: This file defines the pozyx related functions. Most of them are inspired by the official Arduino
+ * library.
+ * ----------------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 #ifndef __POZYX_H__
 #define __POZYX_H__
 
@@ -13,21 +23,23 @@ typedef struct pozyx_s {
   uint16_t device_address;
 
   /* DMA */
-  uint8_t tx_buf[1];
-  // Note: 22 bytes for calib data. Biggest data for sensors is 8 bytes for quaternion.
-  volatile uint8_t rx_buf[4 * sizeof(int16_t)];
+  uint8_t tx_buf[2];
+  // Note:  3 * sizeof(int32_t) for the position
+  volatile uint8_t rx_buf[3 * sizeof(int32_t)];
 
   int8_t reading_device; // The device which is currently read! -1 for no device
 
   // Data
-  geometry_msgs__msg__Quaternion *orientation;
-  geometry_msgs__msg__Point *position;
+  geometry_msgs__msg__Quaternion orientation;
+  geometry_msgs__msg__Point position;
 
   uint8_t who_am_i;
   uint16_t network_id;
   uint8_t firmware_version;
   uint8_t hardware_version;
   uint8_t calib_status;
+
+  bool new_pos_available;
 
 } pozyx_t;
 
@@ -44,5 +56,13 @@ void pozyx_read_harware_version(pozyx_t *pozyx);
 void pozyx_read_network_id(pozyx_t *pozyx);
 
 void pozyx_read_calibration_state(pozyx_t *pozyx);
+
+void pozyx_read_position(pozyx_t *pozyx);
+void pozyx_read_position(pozyx_t *pozyx);
+
+bool pozyx_check_for_position_and_update(pozyx_t *pozyx);
+
+void pozyx_config_interrupt_pin(pozyx_t *pozyx, uint8_t pin, uint8_t mode, uint8_t bActiveHigh, uint8_t bLatch);
+void pozyx_set_interrupt_mask(pozyx_t *pozyx, uint8_t mask);
 
 #endif /* __POZYX_H__ */

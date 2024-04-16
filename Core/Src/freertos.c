@@ -398,6 +398,9 @@ void start_ros_task(void *argument) {
   // Optional prepare for avoiding allocations during spin
   RCCHECK(rclc_executor_prepare(&executor));
 
+  // set frame ids
+  pozyx_msg.header.frame_id = micro_ros_string_utilities_init("pozyx");
+
   bool last_button_state = false;
 
   for (;;) {
@@ -485,6 +488,16 @@ void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
 
   stamp_header(&encoders_msg.header.stamp);
   RCCHECK(rcl_publish(&encoders_pup, &encoders_msg, NULL));
+
+  // Publish Pozyx if a new position is available
+  if (pozyx_check_for_position_and_update(&pozyx)) {
+    while (pozyx.hi2c->State != HAL_I2C_STATE_READY) {
+    }
+    stamp_header(&pozyx_msg.header.stamp);
+    geometry_msgs__msg__Point__copy(&pozyx.position, &pozyx_msg.pose.position);
+    geometry_msgs__msg__Quaternion__copy(&pozyx.orientation, &pozyx_msg.pose.orientation);
+    RCCHECK(rcl_publish(&pozyx_pup, &pozyx_msg, NULL));
+  }
 }
 
 void timer_250ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
@@ -591,7 +604,7 @@ void pozyx_set_pwr_callback(const void *pozyx_set_pwr_req, void *pozyx_set_pwr_r
 
   if (!res->old_state) {
     RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Turning on pozyx.");
-    osDelay(500);
+    osDelay(1000);
     pozyx_init(&pozyx, &hi2c1, POZYX_I2C_ADDRESS);
   }
 }

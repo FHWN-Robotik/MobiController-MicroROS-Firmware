@@ -126,7 +126,7 @@ PREFIX = arm-none-eabi-
 POSTFIX = "
 # The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
 # either it can be added to the PATH environment variable.
-GCC_PATH="/nix/store/h7prigvdx25mfvhnajvk13cqlxq35al8-gcc-arm-embedded-12.3.rel1/bin
+GCC_PATH="/nix/store/b1r19yiij7a2ci6wa6619cil74qs6cly-gcc-arm-embedded-12.3.rel1/bin
 ifdef GCC_PATH
 CXX = $(GCC_PATH)/$(PREFIX)g++$(POSTFIX)
 CC = $(GCC_PATH)/$(PREFIX)gcc$(POSTFIX)

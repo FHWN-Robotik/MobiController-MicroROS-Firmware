@@ -49,6 +49,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     encoder_handle_interrupt(&encoder_3);
   } else if (GPIO_Pin == encoder_4.gpio_a_pin) {
     encoder_handle_interrupt(&encoder_4);
+  } else if (GPIO_Pin == POZYX_INT1_Pin) {
+    pozyx.new_pos_available = true;
   }
 }
 
