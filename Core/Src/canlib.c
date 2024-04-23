@@ -9,10 +9,13 @@
 
 #include "canlib.h"
 #include "can.h"
+#include "rmw_microros/time_sync.h"
 #include "utils.h"
 
 void canlib_init(canlib_t *can, CAN_HandleTypeDef *can_handle) {
   can->can_handle = can_handle;
+  can->is_driving = false;
+  can->last_update = rmw_uros_epoch_millis();
   HAL_CAN_Start(can_handle);
 }
 
@@ -35,6 +38,11 @@ HAL_StatusTypeDef canlib_send_extended(canlib_t *can, uint32_t ext_id, const uin
 
 HAL_StatusTypeDef canlib_send_stop(canlib_t *can) {
   uint8_t data[8] = {};
+
+  // Set is driving
+  can->is_driving = false;
+  can->last_update = rmw_uros_epoch_millis();
+
   return canlib_send_extended(can, CANLIB_MOVE_LATERALLY, data);
 }
 
@@ -86,5 +94,14 @@ HAL_StatusTypeDef canlib_drive(canlib_t *can, int16_t vx, int16_t vy, int16_t vp
   uint8_t data[8] = {
     x_low, x_high, y_low, y_high, phi_low, phi_high, 0x00, 0x00,
   };
+
+  // Set is driving
+  if (x_low == 0 && x_high == 0 && y_low == 0 && y_high == 0 && phi_low == 0 && phi_high == 0) {
+    can->is_driving = false;
+  } else {
+    can->is_driving = true;
+  }
+  can->last_update = rmw_uros_epoch_millis();
+
   return canlib_send_extended(can, CANLIB_MOVE_LATERALLY, data);
 }

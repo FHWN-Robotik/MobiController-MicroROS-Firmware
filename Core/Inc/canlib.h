@@ -18,6 +18,8 @@
 
 typedef struct canlib_s {
   CAN_HandleTypeDef *can_handle;
+  bool is_driving;
+  uint64_t last_update;
 } canlib_t;
 
 void canlib_init(canlib_t *can, CAN_HandleTypeDef *can_handle);

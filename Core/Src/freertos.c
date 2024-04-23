@@ -526,6 +526,11 @@ void timer_250ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
   ultra_ranges_msg.center_right.range = ultra_6.range;
   stamp_header(&ultra_ranges_msg.center_right.header.stamp);
   RCCHECK(rcl_publish(&ultra_ranges_pup, &ultra_ranges_msg, NULL));
+
+  // Check if should stop
+  if (can.is_driving && rmw_uros_epoch_millis() - can.last_update > 1000) {
+    canlib_send_stop(&can);
+  }
 }
 
 // Service callbacks
