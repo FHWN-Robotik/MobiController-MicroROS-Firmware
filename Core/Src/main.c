@@ -137,6 +137,15 @@ int main(void) {
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
+  printf("\n---------------------------------------------\n");
+  printf("DEBUG INTERFACE!\n");
+  printf("MobiController Firmware\n");
+  printf("version %s\n", FIRMWARE_VERSION);
+  printf("Time of compilation: %s %s\n", __DATE__, __TIME__);
+  printf("Compiler version: %d.%d.%d\n", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+  printf("Copyright FHWN Florian Hye\n");
+  printf("---------------------------------------------\n");
+
   printf("Init power manager...\n");
   pwr_manager_init(&pwr_manager, &hadc1);
 
