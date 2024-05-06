@@ -32,6 +32,23 @@ It is possible to flash the firmware either via the ST-Link v2 debug port or the
 
 ### Flashing via DFU-Mode
 
+#### Using the updater script
+
+> The updater can be found in the [FHWN-Robotik/MobiController-Firmware-Updater](https://github.com/FHWN-Robotik/MobiController-Firmware-Updater) repository.
+
+1. Download the updater
+
+    ```bash
+    git clone https://github.com/FHWN-Robotik/MobiController-Firmware-Updater.git
+    cd MobiController-Firmware-Updater
+    ```
+
+2. Run the updater
+
+    ```bash
+    python3 src/updater.py
+    ```
+
 #### Using a downloaded binary
 
 1. Download the binary from the [release page](https://github.com/FHWN-Robotik/MobiController-MicroROS-Firmware/releases/latest).
