@@ -144,7 +144,7 @@
         "USE_FULL_ASSERT",
         "USE_HAL_DRIVER"
       ],
-      "compilerPath": "/nix/store/h7prigvdx25mfvhnajvk13cqlxq35al8-gcc-arm-embedded-12.3.rel1/bin/arm-none-eabi-gcc"
+      "compilerPath": "/nix/store/b1r19yiij7a2ci6wa6619cil74qs6cly-gcc-arm-embedded-12.3.rel1/bin/arm-none-eabi-gcc"
     }
   ],
   "version": 4

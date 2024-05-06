@@ -1,5 +1,10 @@
 {
-  "stm32-for-vscode.openOCDPath": "/nix/store/40ika5hf2zhqk2xaa8jg254276fhn1z4-openocd-0.12.0/bin/openocd",
-  "cortex-debug.openocdPath": "/nix/store/40ika5hf2zhqk2xaa8jg254276fhn1z4-openocd-0.12.0/bin/openocd",
-  "cortex-debug.armToolchainPath": "/nix/store/h7prigvdx25mfvhnajvk13cqlxq35al8-gcc-arm-embedded-12.3.rel1/bin",
+  "stm32-for-vscode.openOCDPath": "/nix/store/w1bjl1fj8c9yvi9ycwfn8sk7h9vigcz5-openocd-0.12.0/bin/openocd",
+  "cortex-debug.openocdPath": "/nix/store/w1bjl1fj8c9yvi9ycwfn8sk7h9vigcz5-openocd-0.12.0/bin/openocd",
+  "cortex-debug.armToolchainPath": "/nix/store/b1r19yiij7a2ci6wa6619cil74qs6cly-gcc-arm-embedded-12.3.rel1/bin",
+  "files.associations": {
+    "get_calib_status.h": "c",
+    "string_utilities.h": "c",
+    "bno055_dma.h": "c"
+  },
 }

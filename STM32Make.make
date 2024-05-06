@@ -410,13 +410,13 @@ $(BUILD_DIR):
 # flash
 #######################################
 flash: $(BUILD_DIR)/$(TARGET).elf
-	"/nix/store/40ika5hf2zhqk2xaa8jg254276fhn1z4-openocd-0.12.0/bin/openocd" -f ./openocd.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
+	"/nix/store/w1bjl1fj8c9yvi9ycwfn8sk7h9vigcz5-openocd-0.12.0/bin/openocd" -f ./openocd.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
 
 #######################################
 # erase
 #######################################
 erase: $(BUILD_DIR)/$(TARGET).elf
-	"/nix/store/40ika5hf2zhqk2xaa8jg254276fhn1z4-openocd-0.12.0/bin/openocd" -f ./openocd.cfg -c "init; reset halt; stm32l4x mass_erase 0; exit"
+	"/nix/store/w1bjl1fj8c9yvi9ycwfn8sk7h9vigcz5-openocd-0.12.0/bin/openocd" -f ./openocd.cfg -c "init; reset halt; stm32l4x mass_erase 0; exit"
 
 #######################################
 # clean up
