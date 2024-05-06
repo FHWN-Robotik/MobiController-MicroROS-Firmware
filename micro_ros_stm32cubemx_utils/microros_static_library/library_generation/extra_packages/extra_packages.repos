@@ -1,5 +1,5 @@
 repositories:
-  control_msgs:
+  mobi_interfaces:
     type: git
-    url: https://github.com/ros-controls/control_msgs
-    version: galactic-devel
+    url: https://github.com/FHWN-Robotik/mobi_interfaces
+    version: main
