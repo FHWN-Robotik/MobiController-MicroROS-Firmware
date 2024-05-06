@@ -296,7 +296,7 @@ void start_ros_task(void *argument) {
 
   // Setup logging
   RCCHECK(rcutils_logging_initialize_with_allocator(allocator));
-  rcutils_logging_set_default_logger_level(RCUTILS_LOG_SEVERITY_DEBUG);
+  rcutils_logging_set_default_logger_level(RCUTILS_LOG_SEVERITY_INFO);
 
   RCCHECK(rcl_init_options_init(&init_options, allocator));
 
