@@ -69,7 +69,7 @@ It is possible to flash the firmware either via the ST-Link v2 debug port or the
 3. Use dfu-util to flash the binary.
 
     ```bash
-    dfu-util -a 0 -w -D ./micro_ros_firmware.bin -s 0x08000000:leave
+    dfu-util -a 0 -D ./micro_ros_firmware.bin -s 0x08000000:leave
     ```
 
 #### When building from source
@@ -91,7 +91,7 @@ It is possible to flash the firmware either via the ST-Link v2 debug port or the
 4. To flash the binary to the STM32, run the following command from within the folder where the files are located:
 
     ```bash
-    openocd -f ./openocd.cfg -c "program ./micro_ros_firmware.bin verify reset exit"
+    openocd -f ./openocd.cfg -c "program ./micro_ros_firmware.elf verify reset exit"
     ```
 
 #### When building from source
@@ -132,9 +132,9 @@ It is possible to flash the firmware either via the ST-Link v2 debug port or the
     Alteretivly, you can run following cli command:
 
     ```bash
-    make -j16 -f STM32Make.make build
+    make -j16 -f STM32Make.make
     ```
 
 4. Output location
 
-    The compiled binary can now be found at `build/micro_ros_firmware.bin`.
+    The compiled binary can now be found at `build/micro_ros_firmware.*`.
