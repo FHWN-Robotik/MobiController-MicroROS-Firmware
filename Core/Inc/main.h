@@ -171,7 +171,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define LOGGER_NAME "MOBI"
-#define FIRMWARE_VERSION "v2.0.0"
+#define FIRMWARE_VERSION "v2.0.1"
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
