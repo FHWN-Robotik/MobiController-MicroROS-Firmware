@@ -225,7 +225,6 @@ void start_ros_task(void *argument) {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN start_ros_task */
-  /* Infinite loop */
 
   // micro-ROS configuration
 
@@ -241,6 +240,23 @@ void start_ros_task(void *argument) {
   if (!rcutils_set_default_allocator(&freeRTOS_allocator)) {
     RCUTILS_LOG_ERROR_NAMED(LOGGER_NAME, "Error on default allocators (line %d)", __LINE__);
   }
+
+  /**
+   * Loop until micro-ROS Agent is up
+   */
+  rmw_ret_t ping_result = rmw_uros_ping_agent(1000, 2);
+
+  while (RMW_RET_OK != ping_result) {
+    ping_result = rmw_uros_ping_agent(1000, 2);
+
+    if (ping_result != RMW_RET_OK) {
+      printf("Please, start your micro-ROS Agent\n");
+      continue;
+    }
+
+    printf("Success! micro-ROS Agent is up.\n");
+    NVIC_SystemReset();
+  };
 
   // micro-ROS app
 
@@ -438,6 +454,13 @@ void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time) {
 
   if (timer == NULL)
     return;
+
+  // Ping the agent, if it is unavailable, reboot and wait durring the boot process.
+  rmw_ret_t ping_result = rmw_uros_ping_agent(1000, 2);
+  if (ping_result != RMW_RET_OK) {
+    printf("Please, start your micro-ROS Agent\n");
+    NVIC_SystemReset();
+  }
 
   // Temperature
   bno055_read_temp(&imu);
