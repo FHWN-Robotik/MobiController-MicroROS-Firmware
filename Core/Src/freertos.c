@@ -231,16 +231,6 @@ void start_ros_task(void *argument) {
   rmw_uros_set_custom_transport(true, NULL, cubemx_transport_open, cubemx_transport_close, cubemx_transport_write,
                                 cubemx_transport_read);
 
-  rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
-  freeRTOS_allocator.allocate = microros_allocate;
-  freeRTOS_allocator.deallocate = microros_deallocate;
-  freeRTOS_allocator.reallocate = microros_reallocate;
-  freeRTOS_allocator.zero_allocate = microros_zero_allocate;
-
-  if (!rcutils_set_default_allocator(&freeRTOS_allocator)) {
-    RCUTILS_LOG_ERROR_NAMED(LOGGER_NAME, "Error on default allocators (line %d)", __LINE__);
-  }
-
   /**
    * Loop until micro-ROS Agent is up
    */
@@ -256,7 +246,18 @@ void start_ros_task(void *argument) {
 
     printf("Success! micro-ROS Agent is up.\n");
     NVIC_SystemReset();
+    break;
   };
+
+  rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
+  freeRTOS_allocator.allocate = microros_allocate;
+  freeRTOS_allocator.deallocate = microros_deallocate;
+  freeRTOS_allocator.reallocate = microros_reallocate;
+  freeRTOS_allocator.zero_allocate = microros_zero_allocate;
+
+  if (!rcutils_set_default_allocator(&freeRTOS_allocator)) {
+    RCUTILS_LOG_ERROR_NAMED(LOGGER_NAME, "Error on default allocators (line %d)", __LINE__);
+  }
 
   // micro-ROS app
 
@@ -417,6 +418,13 @@ void start_ros_task(void *argument) {
   bool last_button_state = false;
 
   for (;;) {
+    // Ping the agent, if it is unavailable, reboot and wait durring the boot process.
+    if (RMW_RET_OK != rmw_uros_ping_agent(1000, 2)) {
+      printf("Please start your micro-ROS Agent\n");
+      NVIC_SystemReset();
+      continue;
+    }
+
     // NOTE: The Button is inverted!
     bool btn_state = !(bool)HAL_GPIO_ReadPin(USER_BTN_GPIO_Port, USER_BTN_Pin);
 
@@ -451,13 +459,6 @@ void timer_1s_callback(rcl_timer_t *timer, int64_t last_call_time) {
 
   if (timer == NULL)
     return;
-
-  // Ping the agent, if it is unavailable, reboot and wait durring the boot process.
-  rmw_ret_t ping_result = rmw_uros_ping_agent(1000, 2);
-  if (ping_result != RMW_RET_OK) {
-    printf("Please, start your micro-ROS Agent\n");
-    NVIC_SystemReset();
-  }
 
   // Temperature
   bno055_read_temp(&imu);
