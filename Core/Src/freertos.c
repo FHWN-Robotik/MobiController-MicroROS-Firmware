@@ -304,25 +304,22 @@ void start_ros_task(void *argument) {
   // RCLC Support
   rclc_support_t support;
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
-  rcl_allocator_t allocator;
 
   rcl_node_t node;
 
-  allocator = rcl_get_default_allocator();
-
   // Setup logging
-  RCCHECK(rcutils_logging_initialize_with_allocator(allocator));
+  RCCHECK(rcutils_logging_initialize_with_allocator(freeRTOS_allocator));
   rcutils_logging_set_default_logger_level(RCUTILS_LOG_SEVERITY_INFO);
 
-  RCCHECK(rcl_init_options_init(&init_options, allocator));
+  RCCHECK(rcl_init_options_init(&init_options, freeRTOS_allocator));
 
   // Domain ID 255 is set so the Domain ID of the agent is used
   // https://github.com/micro-ROS/micro-ROS-Agent/issues/182
   RCCHECK(rcl_init_options_set_domain_id(&init_options, 255));
 
   // create init_options
-  // rclc_support_init(&support, 0, NULL, &allocator);
-  RCCHECK(rclc_support_init_with_options(&support, 0, NULL, &init_options, &allocator));
+  // rclc_support_init(&support, 0, NULL, &freeRTOS_allocator);
+  RCCHECK(rclc_support_init_with_options(&support, 0, NULL, &init_options, &freeRTOS_allocator));
 
   // create node -- Node Name: stm32_node, Namespace: ""
   RCCHECK(rclc_node_init_default(&node, "stm32_node", "", &support));
@@ -383,7 +380,7 @@ void start_ros_task(void *argument) {
 
   // Init executor
   rclc_executor_t executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 12, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 12, &freeRTOS_allocator));
 
   // Add Timers to executor
   RCCHECK(rclc_executor_add_timer(&executor, &timer_1s));
