@@ -784,16 +784,13 @@ void cmd_vel_callback(const void *msgin) {
   RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "CMD_VEL --> x: %f, y: %f, phi: %f", msg->linear.x, msg->linear.y,
                           msg->angular.z);
 
-  int16_t speed = 500;
-  int16_t rot_speed = 2000;
-
   // Flip x and y axis to comply with ROS spec.
   // https://www.ros.org/reps/rep-0103.html#id21
   // x forward, y left, z up
   // but for the motorcontroler the y axis is forward
-  int16_t vx = speed * -msg->linear.y;
-  int16_t vy = speed * msg->linear.x;
-  int16_t vphi = rot_speed * msg->angular.z;
+  int16_t vx = -msg->linear.y;
+  int16_t vy = msg->linear.x;
+  int16_t vphi = msg->angular.z;
 
   HAL_StatusTypeDef status = canlib_drive(&can, vx, vy, vphi);
   RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Status: %d", status);
