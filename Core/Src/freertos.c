@@ -88,7 +88,7 @@ typedef StaticTask_t osStaticThreadDef_t;
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
-// Publishers
+// Declare Publishers
 rcl_publisher_t publisher_button;
 rcl_publisher_t temp_pup;
 rcl_publisher_t imu_pup;
@@ -97,7 +97,7 @@ rcl_publisher_t battery_state_pub;
 rcl_publisher_t ultra_ranges_pup;
 rcl_publisher_t pozyx_pup;
 
-// Publisher msgs
+// Declare Publisher msgs
 std_msgs__msg__Bool msg_button;
 mobi_interfaces__msg__EncodersStamped encoders_msg;
 sensor_msgs__msg__Imu imu_msg = {
@@ -124,10 +124,10 @@ sensor_msgs__msg__BatteryState battery_state_msg = {
 mobi_interfaces__msg__UltraRanges ultra_ranges_msg; // This will be initialized in "start_ros_task"
 geometry_msgs__msg__PoseStamped pozyx_msg;
 
-// Subscribers
+// Declare Subscribers
 rcl_subscription_t cmd_vel_sub;
 
-// Subscriber msgs
+// Declare Subscriber msgs
 geometry_msgs__msg__Twist cmd_vel_msg;
 
 /* USER CODE END Variables */
@@ -226,16 +226,12 @@ void start_ros_task(void *argument) {
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN start_ros_task */
 
-  // micro-ROS configuration
-
+  // micro-ROS custom transport for STM32
   rmw_uros_set_custom_transport(true, NULL, cubemx_transport_open, cubemx_transport_close, cubemx_transport_write,
                                 cubemx_transport_read);
 
-  /**
-   * Loop until micro-ROS Agent is up
-   */
+  // Wait until micro-ROS Agent is up
   rmw_ret_t ping_result = rmw_uros_ping_agent(1000, 2);
-
   while (RMW_RET_OK != ping_result) {
     ping_result = rmw_uros_ping_agent(1000, 2);
 
@@ -249,6 +245,7 @@ void start_ros_task(void *argument) {
     break;
   };
 
+  // micro-ROS configuration
   rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
   freeRTOS_allocator.allocate = microros_allocate;
   freeRTOS_allocator.deallocate = microros_deallocate;
@@ -259,9 +256,11 @@ void start_ros_task(void *argument) {
     RCUTILS_LOG_ERROR_NAMED(LOGGER_NAME, "Error on default allocators (line %d)", __LINE__);
   }
 
-  // micro-ROS app
+  /**
+   * micro-ROS APP
+   */
 
-  // Publishers
+  // Initialize publishers messages which are not initialized at the top
   hcsr04_init_range_msg(&ultra_ranges_msg.front_left, micro_ros_string_utilities_init("us_front_left"));
   hcsr04_init_range_msg(&ultra_ranges_msg.front_right, micro_ros_string_utilities_init("us_front_right"));
   hcsr04_init_range_msg(&ultra_ranges_msg.center_left, micro_ros_string_utilities_init("us_center_left"));
@@ -269,7 +268,7 @@ void start_ros_task(void *argument) {
   hcsr04_init_range_msg(&ultra_ranges_msg.rear_left, micro_ros_string_utilities_init("us_rear_left"));
   hcsr04_init_range_msg(&ultra_ranges_msg.rear_right, micro_ros_string_utilities_init("us_rear_right"));
 
-  // Services
+  // Initialize services
   rcl_service_t imu_get_calib_status_srv = rcl_get_zero_initialized_service();
   mobi_interfaces__srv__GetCalibStatus_Request imu_get_calib_status_req;
   mobi_interfaces__srv__GetCalibStatus_Response imu_get_calib_status_res;
@@ -302,33 +301,36 @@ void start_ros_task(void *argument) {
   mobi_interfaces__srv__SetLedStrip_Request led_strip_set_req;
   mobi_interfaces__srv__SetLedStrip_Response led_strip_set_res;
 
-  // RCLC Support
+  // Declare RCLC Support
   rclc_support_t support;
+
+  // Initialize init_options
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
 
+  // Declare node
   rcl_node_t node;
 
   // Setup logging
   RCCHECK(rcutils_logging_initialize_with_allocator(freeRTOS_allocator));
   rcutils_logging_set_default_logger_level(RCUTILS_LOG_SEVERITY_INFO);
 
+  // Initialize init-options
   RCCHECK(rcl_init_options_init(&init_options, freeRTOS_allocator));
 
   // Domain ID 255 is set so the Domain ID of the agent is used
   // https://github.com/micro-ROS/micro-ROS-Agent/issues/182
   RCCHECK(rcl_init_options_set_domain_id(&init_options, 255));
 
-  // create init_options
-  // rclc_support_init(&support, 0, NULL, &freeRTOS_allocator);
+  // Initialize rclc support
   RCCHECK(rclc_support_init_with_options(&support, 0, NULL, &init_options, &freeRTOS_allocator));
 
   // create node -- Node Name: stm32_node, Namespace: ""
   RCCHECK(rclc_node_init_default(&node, "stm32_node", "", &support));
 
-  // Sync time
+  // Sync time with agent
   RCCHECK(rmw_uros_sync_session(1000));
 
-  // create publisher
+  // Initialize publishers
   RCCHECK(
     rclc_publisher_init_default(&publisher_button, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool), "/button"));
   RCCHECK(rclc_publisher_init_default(&temp_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Temperature),
@@ -343,7 +345,7 @@ void start_ros_task(void *argument) {
   RCCHECK(rclc_publisher_init_default(&pozyx_pup, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, PoseStamped),
                                       "/pozyx"));
 
-  // create subsribers
+  // Initialize subsribers
   RCCHECK(rclc_subscription_init_default(&cmd_vel_sub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
                                          "/cmd_vel"));
 
@@ -412,22 +414,22 @@ void start_ros_task(void *argument) {
   // Optional prepare for avoiding allocations during spin
   RCCHECK(rclc_executor_prepare(&executor));
 
-  // set frame ids
-  pozyx_msg.header.frame_id = micro_ros_string_utilities_init("pozyx");
-
+  // Track the state of the USER_BTN
   bool last_button_state = false;
 
+  // Infinite loop
   for (;;) {
     // Ping the agent, if it is unavailable, reboot and wait durring the boot process.
-    if (RMW_RET_OK != rmw_uros_ping_agent(1000, 2)) {
-      printf("Please start your micro-ROS Agent\n");
-      NVIC_SystemReset();
-      continue;
-    }
+    // if (RMW_RET_OK != rmw_uros_ping_agent(1000, 2)) {
+    //   printf("Please start your micro-ROS Agent\n");
+    //   NVIC_SystemReset();
+    //   continue;
+    // }
 
     // NOTE: The Button is inverted!
     bool btn_state = !(bool)HAL_GPIO_ReadPin(USER_BTN_GPIO_Port, USER_BTN_Pin);
 
+    // Check button state and publish once
     if (btn_state != last_button_state) {
       last_button_state = btn_state;
       msg_button.data = btn_state;
@@ -438,9 +440,11 @@ void start_ros_task(void *argument) {
     // Boot into bootloader if flag is set.
     // Note: The flag gets set by the service /boot_bootloader
     if (should_jump_to_bootloader) {
+      // Do LED animation
       pwr_manager_set_power_led(true);
       led_strip_power_on_animation(&led_strip, &(mobi_interfaces__msg__ColorRGBW){.r = 255, .g = 0, .b = 100, .w = 0});
-      osDelay(1800);
+
+      osDelay(1800); // Wait for the LED animation to finish
       jump_to_bootloader();
     }
 
@@ -514,6 +518,7 @@ void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
   if (pozyx_check_for_position_and_update(&pozyx)) {
     while (pozyx.hi2c->State != HAL_I2C_STATE_READY) {
     }
+    pozyx_msg.header.frame_id = micro_ros_string_utilities_init("pozyx");
     stamp_header(&pozyx_msg.header.stamp);
     geometry_msgs__msg__Point__copy(&pozyx.position, &pozyx_msg.pose.position);
     geometry_msgs__msg__Quaternion__copy(&pozyx.orientation, &pozyx_msg.pose.orientation);
