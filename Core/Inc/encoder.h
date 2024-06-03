@@ -19,7 +19,7 @@ typedef struct encoder_s {
   GPIO_TypeDef *gpio_b_port;
   uint16_t gpio_b_pin;
 
-  uint32_t counter;
+  int32_t counter;
 
 } encoder_t;
 
