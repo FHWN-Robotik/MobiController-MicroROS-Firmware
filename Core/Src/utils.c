@@ -13,11 +13,8 @@
 #include "rmw_microros/time_sync.h"
 
 void stamp_header(builtin_interfaces__msg__Time *stamp) {
-  rcutils_time_point_value_t now;
-  RCUTILS_STEADY_TIME(&now);
-
-  stamp->sec = rmw_uros_epoch_millis();
-  stamp->nanosec = rmw_uros_epoch_nanos();
+  stamp->sec = (int32_t)(rmw_uros_epoch_millis() / 1000);
+  stamp->nanosec = (int32_t)rmw_uros_epoch_nanos();
 }
 
 double clamp(double d, double min, double max) {
