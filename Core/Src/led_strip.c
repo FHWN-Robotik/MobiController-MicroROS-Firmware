@@ -71,7 +71,6 @@ void led_strip_handle_timer_interrupt(led_strip_t *led_strip) {
   switch (led_strip->animation_config.type) {
   case mobi_interfaces__srv__SetLedStrip_Request__LED_ANIMATION_BLINK: {
     if (led_strip->current_frame == 0) {
-      // fill_rgbw(led_strip->animation_config.color);
       uint8_t offset = round_half_up_unscaled(NUM_PIXELS * 10 / led_strip->animation_config.line_count, 10);
       for (size_t i = 0; i < led_strip->animation_config.line_count; i++) {
         uint8_t start =
@@ -191,7 +190,6 @@ void led_strip_battery_warning_light(led_strip_t *led_strip) {
 }
 
 void led_strip_power_on_animation(led_strip_t *led_strip, mobi_interfaces__msg__ColorRGBW *color) {
-  // MobiController::mobictl().pwr_manager->set_power_led(true);
   led_strip_fill(led_strip, color, 1, NUM_PIXELS * 2);
 }
 
