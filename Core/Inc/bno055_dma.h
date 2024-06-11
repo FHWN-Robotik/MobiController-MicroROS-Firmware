@@ -224,7 +224,7 @@ typedef struct BNO055_s {
   geometry_msgs__msg__Vector3 *angular_velocity;
   geometry_msgs__msg__Vector3 *linear_acceleration;
 
-  uint64_t test;
+  uint64_t test; // This is required!! It is not used, but without it the controller does not boot.
   sensor_msgs__msg__Temperature *temperature;
 
   mobi_interfaces__srv__GetCalibStatus_Response *calib_status;
