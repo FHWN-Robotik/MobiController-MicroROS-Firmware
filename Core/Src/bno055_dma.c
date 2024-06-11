@@ -218,6 +218,10 @@ void bno055_read_calibration_data(BNO055_t *imu) {
   imu->reading_device = BNO055_ACC_OFFSET_X_LSB;
 
   // Setting op mode back to NDOF after receiving the data.
+  while (!imu->reading_device == BNO055_DEVICE_NONE) {
+  }
+
+  bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_NDOF);
 }
 
 void bno055_set_calibration_data(BNO055_t *imu, mobi_interfaces__srv__SetImuCalibData_Request *calib_data) {
@@ -225,7 +229,7 @@ void bno055_set_calibration_data(BNO055_t *imu, mobi_interfaces__srv__SetImuCali
   bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_CONFIG);
   bno055_set_page(imu, 0);
 
-  // Assumes litle endian processor
+  // Assumes little endian processor
   buffer[0] = (uint8_t)(calib_data->offset_accelerometer_x & 0xFF);
   buffer[1] = (uint8_t)((calib_data->offset_accelerometer_x >> 8) & 0xFF);
   buffer[2] = (uint8_t)(calib_data->offset_accelerometer_y & 0xFF);
