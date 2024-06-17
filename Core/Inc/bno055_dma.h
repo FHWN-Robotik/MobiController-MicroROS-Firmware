@@ -172,7 +172,7 @@ extern "C" {
 #define BNO055_MAG_SCALE 16
 #define BNO055_QUAT_SCALE (1 << 14) // 2^14
 
-typedef enum { // BNO055 operation modes
+typedef enum { // BNO-55 operation modes
   BNO055_OPERATION_MODE_CONFIG = 0x00,
   // Sensor Mode
   BNO055_OPERATION_MODE_ACCONLY,
@@ -233,6 +233,7 @@ typedef struct BNO055_s {
 } BNO055_t;
 
 // Low level functions
+
 void bno055_init(BNO055_t *imu, I2C_HandleTypeDef *hi2c_device, uint16_t device_address);
 void bno055_write_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t data);
 void bno055_read_DMA(BNO055_t *imu, uint8_t reg_addr, uint8_t len);

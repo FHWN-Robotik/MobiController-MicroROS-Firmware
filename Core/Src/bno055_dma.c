@@ -218,10 +218,6 @@ void bno055_read_calibration_data(BNO055_t *imu) {
   imu->reading_device = BNO055_ACC_OFFSET_X_LSB;
 
   // Setting op mode back to NDOF after receiving the data.
-  while (!imu->reading_device == BNO055_DEVICE_NONE) {
-  }
-
-  bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_NDOF);
 }
 
 void bno055_set_calibration_data(BNO055_t *imu, mobi_interfaces__srv__SetImuCalibData_Request *calib_data) {

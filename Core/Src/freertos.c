@@ -588,6 +588,8 @@ void imu_get_calib_data_callback(const void *imu_get_calib_data_req, void *imu_g
   RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Client requested IMU calibration data.");
 
   bno055_read_calibration_data(&imu);
+  while (!imu.reading_device == BNO055_DEVICE_NONE) {
+  }
 
   mobi_interfaces__srv__GetImuCalibData_Response__copy(imu.calib_data, res);
 }
