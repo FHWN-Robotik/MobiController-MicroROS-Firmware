@@ -106,15 +106,26 @@ It is possible to flash the firmware either via the ST-Link v2 debug port or the
     make -j16 -f STM32Make.make flash
     ```
 
-## How to Build
+## How to Modify and Build
 
-1. Clone this repository
+1. Install following dependencies
+
+   > If you are using NixOS or the Nix package manager, you can use the `nix-shell` in this repository.
+
+    - docker
+    - cmake
+    - gcc-arm-embedded-12
+    - clang-tools
+    - openocd
+    - pre-commit
+
+2. Clone this repository
 
     ```bash
     git clone https://github.com/FHWN-Robotik/MobiController-MicroROS-Firmware.git
     ```
 
-2. Build the MicroROS static library
+3. Build the MicroROS static library
 
     > This steps a taken from the [micro-ROS/micro_ros_stm32cubemx_utils](https://github.com/micro-ROS/micro_ros_stm32cubemx_utils/tree/humble) repository.
 
@@ -125,7 +136,10 @@ It is possible to flash the firmware either via the ST-Link v2 debug port or the
     docker run -it --rm -v $(pwd):/project --env MICROROS_LIBRARY_FOLDER=micro_ros_stm32cubemx_utils/microros_static_library microros/micro_ros_static_library_builder:humble
     ```
 
-3. Build the firmware
+4. Make changes as needed.
+   > If you changed something using STM32CubeMX, run `./after_code_gen.sh` to format the code.
+
+5. Build the firmware
 
     If you're using VS Code with the "stm32-for-vscode" extension, you can run the command `STM32: Build STM32 project`
 
@@ -135,6 +149,6 @@ It is possible to flash the firmware either via the ST-Link v2 debug port or the
     make -j16 -f STM32Make.make
     ```
 
-4. Output location
+6. Output location
 
     The compiled binary can now be found at `build/micro_ros_firmware.*`.
