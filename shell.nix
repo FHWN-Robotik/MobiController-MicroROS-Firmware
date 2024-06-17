@@ -3,6 +3,7 @@
 pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     cmake
+    gdb
     gcc-arm-embedded-12
     clang-tools
     openocd
