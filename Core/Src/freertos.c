@@ -268,6 +268,9 @@ void start_ros_task(void *argument) {
   hcsr04_init_range_msg(&ultra_ranges_msg.rear_left, micro_ros_string_utilities_init("us_rear_left"));
   hcsr04_init_range_msg(&ultra_ranges_msg.rear_right, micro_ros_string_utilities_init("us_rear_right"));
 
+  imu_msg.header.frame_id = micro_ros_string_utilities_init("imu");
+  encoders_msg.header.frame_id = micro_ros_string_utilities_init("encoders");
+
   // Initialize services
   rcl_service_t imu_get_calib_status_srv = rcl_get_zero_initialized_service();
   mobi_interfaces__srv__GetCalibStatus_Request imu_get_calib_status_req;
@@ -496,7 +499,6 @@ void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
   bno055_read_angular_velocity(&imu);
   bno055_read_linear_acceleration(&imu);
 
-  imu_msg.header.frame_id = micro_ros_string_utilities_init("imu");
   imu_msg.orientation = *imu.orientation;
   imu_msg.angular_velocity = *imu.angular_velocity;
   imu_msg.linear_acceleration = *imu.linear_acceleration;
@@ -505,7 +507,6 @@ void timer_100ms_callback(rcl_timer_t *timer, int64_t last_call_time) {
   RCCHECK(rcl_publish(&imu_pup, &imu_msg, NULL));
 
   // Publish encoders
-  encoders_msg.header.frame_id = micro_ros_string_utilities_init("encoders");
   encoders_msg.encoders.front_left = encoder_1.counter;
   encoders_msg.encoders.front_right = encoder_2.counter;
   encoders_msg.encoders.rear_left = encoder_3.counter;
