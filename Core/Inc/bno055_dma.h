@@ -244,6 +244,8 @@ void bno055_read_DMA_complete(BNO055_t *imu);
 void bno055_set_page(BNO055_t *imu, uint8_t page);
 void bno055_set_operation_mode(BNO055_t *imu, bno055_opmode_t opmode);
 
+void bno055_set_unit_sel(BNO055_t *imu, uint8_t unit_sel);
+
 void bno055_read_temp(BNO055_t *imu);
 void bno055_read_quaternion(BNO055_t *imu);
 void bno055_read_angular_velocity(BNO055_t *imu);

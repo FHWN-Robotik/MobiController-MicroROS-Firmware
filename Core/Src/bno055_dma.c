@@ -60,6 +60,14 @@ void bno055_init(BNO055_t *imu, I2C_HandleTypeDef *hi2c_device, uint16_t device_
   bno055_set_page(imu, 0);
   bno055_write_DMA(imu, BNO055_SYS_TRIGGER, 0x0);
 
+  // Set units as follows:
+  // Acceleration: m/s^2
+  // Linear Acceleration, Gravity vector: m/s^2
+  // Angular Rate: rad/s
+  // Euler Angles: degrees
+  // Temperature: °C
+  bno055_set_unit_sel(imu, 0b00000010);
+
   // Set operating mode to config
   bno055_set_operation_mode(imu, BNO055_OPERATION_MODE_CONFIG);
 
@@ -175,7 +183,13 @@ void bno055_read_DMA_complete(BNO055_t *imu) {
 void bno055_set_page(BNO055_t *imu, uint8_t page) { bno055_write_DMA(imu, BNO055_PAGE_ID, page); }
 
 void bno055_set_operation_mode(BNO055_t *imu, bno055_opmode_t opmode) {
+  bno055_set_page(imu, 0);
   bno055_write_DMA(imu, BNO055_OPR_MODE, opmode);
+}
+
+void bno055_set_unit_sel(BNO055_t *imu, uint8_t unit_sel) {
+  bno055_set_page(imu, 0);
+  bno055_write_DMA(imu, BNO055_UNIT_SEL, unit_sel);
 }
 
 void bno055_read_temp(BNO055_t *imu) {
