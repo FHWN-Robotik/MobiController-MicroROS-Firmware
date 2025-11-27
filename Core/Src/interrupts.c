@@ -53,7 +53,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     pozyx.new_pos_available = true;
   }
 }
-
+// Encoder valid or not
 /*
  * ADC
  */

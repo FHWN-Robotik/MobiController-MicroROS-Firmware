@@ -27,7 +27,8 @@
 CAN_HandleTypeDef hcan1;
 
 /* CAN1 init function */
-void MX_CAN1_Init(void) {
+void MX_CAN1_Init(void)
+{
 
   /* USER CODE BEGIN CAN1_Init 0 */
 
@@ -48,21 +49,25 @@ void MX_CAN1_Init(void) {
   hcan1.Init.AutoRetransmission = DISABLE;
   hcan1.Init.ReceiveFifoLocked = DISABLE;
   hcan1.Init.TransmitFifoPriority = DISABLE;
-  if (HAL_CAN_Init(&hcan1) != HAL_OK) {
+  if (HAL_CAN_Init(&hcan1) != HAL_OK)
+  {
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
 
   /* USER CODE END CAN1_Init 2 */
+
 }
 
-void HAL_CAN_MspInit(CAN_HandleTypeDef *canHandle) {
+void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
+{
 
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if (canHandle->Instance == CAN1) {
-    /* USER CODE BEGIN CAN1_MspInit 0 */
+  if(canHandle->Instance==CAN1)
+  {
+  /* USER CODE BEGIN CAN1_MspInit 0 */
 
-    /* USER CODE END CAN1_MspInit 0 */
+  /* USER CODE END CAN1_MspInit 0 */
     /* CAN1 clock enable */
     __HAL_RCC_CAN1_CLK_ENABLE();
 
@@ -85,18 +90,20 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef *canHandle) {
     GPIO_InitStruct.Alternate = GPIO_AF9_CAN1;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* USER CODE BEGIN CAN1_MspInit 1 */
+  /* USER CODE BEGIN CAN1_MspInit 1 */
 
-    /* USER CODE END CAN1_MspInit 1 */
+  /* USER CODE END CAN1_MspInit 1 */
   }
 }
 
-void HAL_CAN_MspDeInit(CAN_HandleTypeDef *canHandle) {
+void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
+{
 
-  if (canHandle->Instance == CAN1) {
-    /* USER CODE BEGIN CAN1_MspDeInit 0 */
+  if(canHandle->Instance==CAN1)
+  {
+  /* USER CODE BEGIN CAN1_MspDeInit 0 */
 
-    /* USER CODE END CAN1_MspDeInit 0 */
+  /* USER CODE END CAN1_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_CAN1_CLK_DISABLE();
 
@@ -104,11 +111,11 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef *canHandle) {
     PB12     ------> CAN1_RX
     PB9     ------> CAN1_TX
     */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12 | GPIO_PIN_9);
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12|GPIO_PIN_9);
 
-    /* USER CODE BEGIN CAN1_MspDeInit 1 */
+  /* USER CODE BEGIN CAN1_MspDeInit 1 */
 
-    /* USER CODE END CAN1_MspDeInit 1 */
+  /* USER CODE END CAN1_MspDeInit 1 */
   }
 }
 

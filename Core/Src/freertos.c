@@ -19,9 +19,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-#include "cmsis_os.h"
-#include "main.h"
 #include "task.h"
+#include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -133,7 +133,7 @@ geometry_msgs__msg__Twist cmd_vel_msg;
 /* USER CODE END Variables */
 /* Definitions for ros_task */
 osThreadId_t ros_taskHandle;
-uint32_t ros_task_buffer[3000];
+uint32_t ros_task_buffer[ 3000 ];
 osStaticThreadDef_t ros_task_control_block;
 const osThreadAttr_t ros_task_attributes = {
   .name = "ros_task",
@@ -141,7 +141,7 @@ const osThreadAttr_t ros_task_attributes = {
   .cb_size = sizeof(ros_task_control_block),
   .stack_mem = &ros_task_buffer[0],
   .stack_size = sizeof(ros_task_buffer),
-  .priority = (osPriority_t)osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -176,10 +176,10 @@ extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
- * @brief  FreeRTOS initialization
- * @param  None
- * @retval None
- */
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
@@ -212,6 +212,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
+
 }
 
 /* USER CODE BEGIN Header_start_ros_task */
@@ -221,7 +222,8 @@ void MX_FREERTOS_Init(void) {
  * @retval None
  */
 /* USER CODE END Header_start_ros_task */
-void start_ros_task(void *argument) {
+void start_ros_task(void *argument)
+{
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN start_ros_task */
@@ -794,11 +796,13 @@ void cmd_vel_callback(const void *msgin) {
   // https://www.ros.org/reps/rep-0103.html#id21
   // x forward, y left, z up
   // but for the motorcontroler the y axis is forward
-  int16_t vx = -msg->linear.y;
-  int16_t vy = msg->linear.x;
-  int16_t vphi = msg->angular.z;
+
+  float vx = -msg->linear.y;
+  float vy = msg->linear.x;
+  float vphi = msg->angular.z;
 
   HAL_StatusTypeDef status = canlib_drive(&can, vx, vy, vphi);
   RCUTILS_LOG_DEBUG_NAMED(LOGGER_NAME, "Status: %d", status);
 }
 /* USER CODE END Application */
+

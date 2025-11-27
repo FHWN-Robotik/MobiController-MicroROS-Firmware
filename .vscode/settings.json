@@ -1,7 +1,7 @@
 {
-  "stm32-for-vscode.openOCDPath": "/nix/store/w1bjl1fj8c9yvi9ycwfn8sk7h9vigcz5-openocd-0.12.0/bin/openocd",
-  "cortex-debug.openocdPath": "/nix/store/w1bjl1fj8c9yvi9ycwfn8sk7h9vigcz5-openocd-0.12.0/bin/openocd",
-  "cortex-debug.armToolchainPath": "/nix/store/b1r19yiij7a2ci6wa6619cil74qs6cly-gcc-arm-embedded-12.3.rel1/bin",
+  "stm32-for-vscode.openOCDPath": "/home/roblab1/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-3.1/.content/bin/openocd",
+  "cortex-debug.openocdPath": "/home/roblab1/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-3.1/.content/bin/openocd",
+  "cortex-debug.armToolchainPath": "/home/roblab1/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/13.2.1-1.1.1/.content/bin",
   "files.associations": {
     "get_calib_status.h": "c",
     "string_utilities.h": "c",

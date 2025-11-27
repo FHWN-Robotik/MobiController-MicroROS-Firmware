@@ -50,3 +50,4 @@ void i2c_check_status(I2C_HandleTypeDef *hi2c, HAL_StatusTypeDef status);
 #endif
 
 #endif /* __I2C_H__ */
+

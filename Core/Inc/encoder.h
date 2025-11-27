@@ -20,6 +20,7 @@ typedef struct encoder_s {
   uint16_t gpio_b_pin;
 
   int32_t counter;
+  uint8_t b_signal;
 
 } encoder_t;
 

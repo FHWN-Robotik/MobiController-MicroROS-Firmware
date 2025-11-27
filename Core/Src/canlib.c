@@ -48,20 +48,21 @@ HAL_StatusTypeDef canlib_send_stop(canlib_t *can) {
 
 /**
  * @brief Drive the robot
- * @param vx Velocity in x direction in mm/s
- * @param vy Velocity in x direction in mm/s
- * @param vphi Velocity in x direction in mrad/s
+ * @param vx Velocity in x direction in m/s
+ * @param vy Velocity in x direction in m/s
+ * @param vphi Velocity in x direction in rad/s
  * @retval HAL status
  */
-HAL_StatusTypeDef canlib_drive(canlib_t *can, int16_t vx, int16_t vy, int16_t vphi) {
+HAL_StatusTypeDef canlib_drive(canlib_t *can, float vx, float vy, float vphi) {
   // NOTE: The motorcontoller does wierd stuff above a value of 2077 mm/s
-  vx = clamp(vx, -2000, 2000);
-  vy = clamp(vy, -2000, 2000);
-  vphi = clamp(vphi, -2000, 2000);
+  
+  int16_t val_x = (int16_t)(vx*10000.0f);      // m/s * 10000
+  int16_t val_y = (int16_t)(vy*10000.0f);      // m/s * 10000
+  int16_t val_phi = (int16_t)(vphi*10000.0f);  // rad/s * 10000 
 
-  int16_t val_x = vx * 10;     // m/s * 10000 -> mm/s * 10
-  int16_t val_y = vy * 10;     // m/s * 10000 -> mm/s * 10
-  int16_t val_phi = vphi * 10; // rad/s * 10000 -> mrad/s * 10
+  val_x = clamp(val_x, -6000, 6000);
+  val_y = clamp(val_y, -6000, 6000);
+  val_phi = clamp(val_phi, -10000, 10000);
 
   uint8_t x_low = val_x & 0xFF;         // Extract the low byte of val_x
   uint8_t x_high = (val_x >> 8) & 0xFF; // Extract the high byte of val_x

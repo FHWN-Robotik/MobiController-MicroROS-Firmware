@@ -28,6 +28,6 @@ HAL_StatusTypeDef canlib_send_data(canlib_t *can, uint32_t ide, uint32_t ext_id,
                                    const uint8_t data[]);
 HAL_StatusTypeDef canlib_send_extended(canlib_t *can, uint32_t ext_id, const uint8_t data[]);
 HAL_StatusTypeDef canlib_send_stop(canlib_t *can);
-HAL_StatusTypeDef canlib_drive(canlib_t *can, int16_t vx, int16_t vy, int16_t vphi);
+HAL_StatusTypeDef canlib_drive(canlib_t *can, float vx, float vy, float vphi);
 
 #endif /* __CANLIB_H_ */
